@@ -1,0 +1,1198 @@
+   1 vi /opt/adobe/ams/Apache2.2/conf/httpd.conf
+   2
+   3 #
+   4 # This is the main Apache server configuration file.  It contains the
+   5 # configuration directives that give the server its instructions.
+   6 # See <URL:http://httpd.apache.org/docs/2.2/> for detailed information.
+   7 # In particular, see
+   8 # <URL:http://httpd.apache.org/docs/2.2/mod/directives.html>
+   9 # for a discussion of each configuration directive.
+  10 #
+  11 # Please see httpd.conf.orig for the configuration of a default
+  12 # (non-AMS) installation of apache.
+  13
+  14 Listen 80
+  15 Listen 8134
+  16
+  17 # If you plan to run AMS as root on linux, you _must_ specify a
+  18 # valid user, with access to the AMS installation direction, or
+  19 # apache will not run.
+  20 #
+  21 # If you've used the default installer, nobody (or whatever other
+  22 # username you gave to the installer) will work here.
+  23 #
+  24 # If you're running a developer build under your own home directory,
+  25 # you should use your own username.
+  26 User ams
+  27 Group ams
+  28
+  29 AccessFileName .htaccess
+  30 ServerSignature On
+  31 UseCanonicalName Off
+  32 HostnameLookups Off
+  33
+  34 Timeout 120
+  35 KeepAlive On
+  36 MaxKeepAliveRequests 100
+  37 KeepAliveTimeout 15
+  38
+  39 ErrorLog logs/error_log
+  40 LogLevel info
+  41 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+  42 CustomLog logs/access_log combined
+  43
+  44 # Proxy rtmpt to AMS
+  45 ProxyRequests Off
+  46 ProxyPass /open/ http://localhost:1935/open/
+  47 ProxyPass /close/ http://localhost:1935/close/
+  48 ProxyPass /idle/ http://localhost:1935/idle/
+  49 ProxyPass /send/ http://localhost:1935/send/
+  50 ProxyPass /fcs/ http://localhost:1935/fcs/
+  51 ProxyPass /fms/ http://localhost:1935/fms/
+  52
+  53 DocumentRoot "/mnt/webroot"
+  54
+  55 DirectoryIndex index.html index.html.var index.php index.php3 index.php4 index.php5 index.py index.pl index.rb
+  56
+  57 <Directory />
+  58     Options FollowSymLinks
+  59     AllowOverride None
+  60     Order allow,deny
+  61     Allow from all
+  62     Satisfy all
+  63 </Directory>
+  64
+  65 <Directory "/mnt/webroot">
+  66     Options -Indexes FollowSymLinks
+  67     AllowOverride None
+  68     Order allow,deny
+  69     Allow from all
+  70 </Directory>
+  71
+  72 Alias /documentation ../documentation/
+  73 <Directory ../documentation/>
+  74     Options FollowSymLinks
+  75     AllowOverride None
+  76     Order allow,deny
+  77     Allow from all
+  78 </Directory>
+  79
+  80
+  81 Alias /icons/ "icons/"
+  82 <Directory "icons">
+  83     Options MultiViews FollowSymLinks
+  84     AllowOverride None
+  85     Order allow,deny
+  86     Allow from all
+  87 </Directory>
+  88
+  89 Alias /error/ "error/"
+  90
+  91 ScriptAlias /cgi-bin/ "cgi-bin/"
+  92 <Directory "cgi-bin">
+  93     AllowOverride None
+  94     Options None
+  95     Order allow,deny
+  96     Allow from all
+  97 </Directory>
+  98
+  99 <Location /server-status>
+ 100     SetHandler server-status
+ 101     Order deny,allow
+ 102     Deny from all
+ 103     Allow from 10.0.0.0/8
+ 104     Allow from 172.16.0.0/12
+ 105     Allow from 192.168.0.0/16
+ 106
+ 107
+ 108     Allow from 127.
+ 109 </Location>
+ 110 ExtendedStatus On
+ 111 <Location /server-info>
+ 112     SetHandler server-info
+ 113     Order deny,allow
+ 114     Deny from all
+ 115     Allow from 10.0.0.0/8
+ 116     Allow from 172.16.0.0/12
+ 117     Allow from 192.168.0.0/16
+ 118     Allow from 127.
+ 119 </Location>
+ 120
+ 121 <FilesMatch "^\.ht">
+ 122     Order allow,deny
+ 123     Deny from all
+ 124 </FilesMatch>
+ 125
+ 126 <IfModule mpm_winnt_module>
+ 127     ThreadsPerChild 250
+ 128     MaxRequestsPerChild 0
+ 129 </IfModule>
+ 130 <IfModule worker_module>
+ 131     StartServers         2
+ 132     MaxClients         150
+ 133     MinSpareThreads     25
+ 134     MaxSpareThreads     75
+ 135     ThreadsPerChild     25
+ 136     MaxRequestsPerChild  0
+ 137 </IfModule>
+ 138
+ 139 LoadModule actions_module modules/mod_actions.so
+ 140 #LoadModule alias_module modules/mod_alias.so
+ 141 LoadModule asis_module modules/mod_asis.so
+ 142 LoadModule auth_basic_module modules/mod_auth_basic.so
+ 143 LoadModule auth_digest_module modules/mod_auth_digest.so
+ 144 LoadModule authn_anon_module modules/mod_authn_anon.so
+ 145 #LoadModule authn_dbm_module modules/mod_authn_dbm.so
+ 146 LoadModule authn_default_module modules/mod_authn_default.so
+ 147 LoadModule authn_file_module modules/mod_authn_file.so
+ 148 #LoadModule authz_dbm_module modules/mod_authz_dbm.so
+ 149 LoadModule authz_default_module modules/mod_authz_default.so
+ 150 LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
+ 151 LoadModule authz_host_module modules/mod_authz_host.so
+ 152 LoadModule authz_user_module modules/mod_authz_user.so
+ 153 LoadModule autoindex_module modules/mod_autoindex.so
+ 154 #LoadModule cern_meta_module modules/mod_cern_meta.so
+ 155 <IfModule mpm_winnt_module>
+ 156     LoadModule cgi_module modules/mod_cgi.so
+ 157 </IfModule>
+ 158
+ 159
+ 160 <IfModule worker_module>
+ 161     LoadModule cgid_module modules/mod_cgid.so
+ 162 </IfModule>
+ 163 LoadModule dav_module modules/mod_dav.so
+ 164 LoadModule dav_fs_module modules/mod_dav_fs.so
+ 165 LoadModule deflate_module modules/mod_deflate.so
+ 166 LoadModule dir_module modules/mod_dir.so
+ 167 LoadModule env_module modules/mod_env.so
+ 168 #LoadModule expires_module modules/mod_expires.so
+ 169 #LoadModule file_cache_module modules/mod_file_cache.so
+ 170 LoadModule headers_module modules/mod_headers.so
+ 171 LoadModule imagemap_module modules/mod_imagemap.so
+ 172 LoadModule include_module modules/mod_include.so
+ 173 LoadModule info_module modules/mod_info.so
+ 174 <IfModule mpm_winnt_module>
+ 175     LoadModule isapi_module modules/mod_isapi.so
+ 176 </IfModule>
+ 177 LoadModule log_config_module modules/mod_log_config.so
+ 178 LoadModule mime_module modules/mod_mime.so
+ 179 LoadModule mime_magic_module modules/mod_mime_magic.so
+ 180 LoadModule proxy_module modules/mod_proxy.so
+ 181 LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
+ 182 LoadModule proxy_balancer_module modules/mod_proxy_balancer.so
+ 183 LoadModule proxy_connect_module modules/mod_proxy_connect.so
+ 184 LoadModule proxy_http_module modules/mod_proxy_http.so
+ 185 LoadModule proxy_ftp_module modules/mod_proxy_ftp.so
+ 186 LoadModule negotiation_module modules/mod_negotiation.so
+ 187 LoadModule rewrite_module modules/mod_rewrite.so
+ 188 LoadModule setenvif_module modules/mod_setenvif.so
+ 189 #LoadModule speling_module modules/mod_speling.so
+ 190 LoadModule status_module modules/mod_status.so
+ 191 LoadModule unique_id_module modules/mod_unique_id.so
+ 192 LoadModule userdir_module modules/mod_userdir.so
+ 193 #LoadModule usertrack_module modules/mod_usertrack.so
+ 194 #LoadModule vhost_alias_module modules/mod_vhost_alias.so
+ 195 #LoadModule ssl_module modules/mod_ssl.so
+ 196
+ 197
+ 198 ##############################################################################
+ 199 # The following section enables disk caching of http content                             #
+ 200 # htcacheclean tool manages the amount of data that is cached on disk. #
+ 201 # See Apache documentation for its usage.                                    #
+ 202 # http://httpd.apache.org/docs/2.2/programs/htcacheclean.html                #
+ 203 # Make sure the directory specified by the CacheRoot directive exists. The   #
+ 204 # default is a directory named cacheroot that is directly under the Apache   #
+ 205 # installation directory.                                                    #
+ 206 # For more information on content caching, see Apache documentation          #
+ 207 # http://httpd.apache.org/docs/2.2/caching.html                              #
+ 208 ##############################################################################
+ 209
+ 210 #Comment out the following to disable disk caching
+ 211
+ 212
+ 213 LoadModule cache_module modules/mod_cache.so
+ 214 <IfModule mod_cache.c>
+ 215     LoadModule disk_cache_module modules/mod_disk_cache.so
+ 216     <IfModule mod_disk_cache.c>
+ 217         CacheEnable disk /hds-vod
+ 218         CacheEnable disk /hls-vod
+ 219             CacheEnable disk /hds-live
+ 220             CacheEnable disk /hls-live
+ 221         CacheRoot /opt/adobe/ams/Apache2.2/cacheroot
+ 222                 CacheLockPath /tmp/mod_cache-lock-ams
+ 223         CacheMaxFileSize 10000000
+ 224         CacheLock On
+ 225     </IfModule>
+ 226 </IfModule>
+ 227
+ 228 <IfModule mod_deflate.c>
+ 229 AddOutputFilterByType DEFLATE application/vnd.apple.mpegurl
+ 230 Header append Vary Accept-Encoding env=!dont-vary
+ 231 </IfModule>
+ 232
+ 233 LoadModule alias_module modules/mod_alias.so
+ 234 LoadModule f4fhttp_module modules/mod_f4fhttp.so
+ 235 <IfModule f4fhttp_module>
+ 236 <Location /vod>
+ 237     HttpStreamingEnabled true
+ 238     HttpStreamingContentPath "/mnt/webroot/vod"
+ 239     Options -Indexes FollowSymLinks
+ 240 </Location>
+ 241
+ 242 # Drop the Range header when more than 5 ranges.
+ 243 # CVE-2011-3192
+ 244 SetEnvIf Range (,.*?){5,} bad-range=1
+ 245 RequestHeader unset Range env=bad-range
+ 246
+ 247 # map old style url to new (as of AMS 4.5), more compact url
+ 248 Redirect 301 /live/events/livepkgr/events /hds-live/livepkgr
+ 249 Redirect 301 /live/events/livepkgr/streams/livepkgr /hds-live/streams/livepkgr
+ 250
+ 251 # If you are using any other location directive and 'audio-only=true' in the query parameter for AMS 5.0,
+ 252 # please replace hls-live or hls-vod with that location directive below
+ 253 RewriteEngine On
+ 254 RewriteCond %{QUERY_STRING} audio-only=true
+ 255 RewriteCond %{QUERY_STRING} codec=aac
+ 256 RewriteRule ^/hls-vod/(.+).m3u8$ /hls-vod/audio-only-aac/$1.m3u8? [R=301,L]
+ 257 RewriteCond %{QUERY_STRING} audio-only=true
+ 258 RewriteRule ^/hls-vod/(.+).m3u8$ /hls-vod/audio-only/$1.m3u8? [R=301,L]
+ 259 RewriteCond %{QUERY_STRING} audio-only=true
+ 260 RewriteCond %{QUERY_STRING} codec=aac
+ 261 RewriteRule ^/hls-live/(.+).m3u8$ /hls-live/audio-only-aac/$1.m3u8? [R=301,L]
+ 262 RewriteCond %{QUERY_STRING} audio-only=true
+ 263 RewriteRule ^/hls-live/(.+).m3u8$ /hls-live/audio-only/$1.m3u8? [R=301,L]
+ 264
+ 265
+ 266 <Location /hds-live>
+ 267     HttpStreamingEnabled true
+ 268     HttpStreamingLiveEventPath "/mnt/applications"
+ 269     HttpStreamingContentPath "/mnt/applications"
+ 270         HdsFmsDirPath ".."
+ 271     HttpStreamingF4MMaxAge 2
+ 272     HttpStreamingBootstrapMaxAge 2
+ 273     HttpStreamingDrmmetaMaxAge 3600
+ 274     HttpStreamingFragMaxAge -1
+ 275     Options -Indexes FollowSymLinks
+ 276 </Location>
+ 277 </IfModule>
+ 278
+ 279 LoadModule hlshttp_module modules/mod_hlshttp.so
+ 280 <IfModule hlshttp_module>
+ 281
+ 282 <Location /hls-live>
+ 283     HLSHttpStreamingEnabled true
+ 284     HttpStreamingLiveEventPath "/mnt/applications"
+ 285     HttpStreamingContentPath "/mnt/applications"
+ 286     HLSMediaFileDuration 8000
+ 287     HLSSlidingWindowLength 6
+ 288     HLSFmsDirPath ".."
+ 289     HttpStreamingUnavailableResponseCode 503
+ 290
+ 291 ########################################
+ 292 # Cache-control header configuration start
+ 293 # Specify the max-age(in secs) to set in the Cache-Control header
+ 294 # for different response types (m3u8, ts, drmmeta,...).
+ 295 # A value of -1 turns off setting the cache control header.
+ 296
+ 297     HLSM3U8MaxAge 2
+ 298     HLSTSSegmentMaxAge -1
+ 299     HLSMetaMaxAge 3600
+ 300     HLSMaxEventAge 300
+ 301
+ 302 # Cache-control header configuration end
+ 303 ########################################
+ 304
+ 305 # Uncomment the following directives to enable encryption
+ 306 # for this location.
+ 307 #    HLSEncryptionScope server
+ 308 #    HLSEncryptCipherKeyFile "../creds/liveeventkey.bin"
+ 309 #    HLSEncryptKeyURI        "https://<ServerName>/hls-key/liveeventkey.bin"
+ 310
+ 311     Options -Indexes FollowSymLinks
+ 312 </Location>
+ 313
+ 314 <Location /hls-vod>
+ 315     HLSHttpStreamingEnabled true
+ 316     HLSMediaFileDuration 8000
+ 317
+ 318
+ 319     HttpStreamingContentPath "/mnt/webroot/vod"
+ 320     HLSFmsDirPath ".."
+ 321     HLSJITConfAllowed true
+ 322
+ 323 ########################################
+ 324 # Cache-control header configuration start
+ 325 # Specify the max-age(in secs) to set in the Cache-Control header
+ 326 # for different response types (m3u8, ts, drmmeta,...).
+ 327 # A value of -1 turns off setting the cache control header.
+ 328
+ 329     HLSM3U8MaxAge 86400
+ 330     HLSTSSegmentMaxAge 86400
+ 331     HLSMetaMaxAge 3600
+ 332
+ 333 # Cache-control header configuration end
+ 334 ########################################
+ 335
+ 336 # Uncomment the following directives to enable encryption
+ 337 # for this location.
+ 338 #    HLSEncryptionScope server
+ 339 #    HLSEncryptCipherKeyFile "../creds/vodkey.bin"
+ 340 #    HLSEncryptKeyURI        "https://<ServerName>/hls-key/vodkey.bin"
+ 341
+ 342     Options -Indexes FollowSymLinks
+ 343 </Location>
+ 344
+ 345 </IfModule>
+ 346
+ 347
+ 348
+ 349 LoadModule jithttp_module modules/mod_jithttp.so
+ 350 <IfModule jithttp_module>
+ 351 <Location /hds-vod>
+ 352     HttpStreamingJITPEnabled true
+ 353     HttpStreamingContentPath "/mnt/webroot/vod"
+ 354     HttpStreamingJITConfAllowed true
+ 355     JitFmsDirPath ".."
+ 356     Options -Indexes FollowSymLinks
+ 357
+ 358 # Uncomment the following directives to enable encryption
+ 359 # for this location.
+ 360 #   EncryptionScope server
+ 361 #   ProtectionScheme phds
+ 362 </Location>
+ 363 </IfModule>
+ 364
+ 365 LoadModule ctrlplane_module modules/mod_ctrlplane.so
+ 366 <IfModule ctrlplane_module>
+ 367 <Location /ctrlplane>
+ 368                 SetHandler ctrlplane
+ 369                 HdsHttpStreamingLiveEventPath "/mnt/applications"
+ 370
+ 371
+ 372                 HlsHttpStreamingLiveEventPath "./mnt/applications"
+ 373                 MaxBootstrapAge 300
+ 374                 Options -Indexes FollowSymLinks
+ 375 </Location>
+ 376 </IfModule>
+ 377
+ 378
+ 379
+ 380 TypesConfig conf/mime.types
+ 381 MIMEMagicFile conf/magic
+ 382 DefaultType text/plain
+ 383
+ 384 AddType video/x-flv .flv
+ 385 AddType video/MP2T .ts
+ 386
+ 387 AddType application/x-compress .Z
+ 388 AddType application/x-gzip .gz .tgz
+ 389 AddType application/x-mpegurl .m3u8
+ 390
+ 391 AddHandler send-as-is asis
+ 392 AddHandler type-map var
+ 393 AddType text/html .shtml
+ 394 AddOutputFilter INCLUDES .shtml
+ 395
+ 396 <IfModule ssl_module>
+ 397     SSLRandomSeed startup builtin
+ 398     SSLRandomSeed connect builtin
+ 399 </IfModule>
+ 400
+ 401 <IfModule userdir_module>
+ 402     UserDir disable
+ 403 </IfModule>
+ 404
+ 405 <IfModule dav_fs_module>
+ 406     DAVLockDB tmp/dav/lockdb
+ 407 </IfModule>
+ 408
+ 409 IndexOptions FancyIndexing VersionSort NameWidth=* HTMLTable
+ 410 AddIconByEncoding (CMP,/icons/compressed.gif) x-compress x-gzip
+ 411 AddIconByType (TXT,/icons/text.gif) text/*
+ 412 AddIconByType (IMG,/icons/image2.gif) image/*
+ 413 AddIconByType (SND,/icons/sound2.gif) audio/*
+ 414 AddIconByType (VID,/icons/movie.gif) video/*
+ 415 AddIconByType (VID,/icons/movie.gif) application/x-shockwave-flash
+ 416 AddIcon /icons/binary.gif .bin .exe
+ 417 AddIcon /icons/binhex.gif .hqx
+ 418 AddIcon /icons/tar.gif .tar
+ 419 AddIcon /icons/world2.gif .wrl .wrl.gz .vrml .vrm .iv
+ 420 AddIcon /icons/compressed.gif .Z .z .tgz .gz .zip
+ 421 AddIcon /icons/a.gif .ps .ai .eps
+ 422 AddIcon /icons/layout.gif .html .shtml .htm .pdf
+ 423
+ 424
+ 425 AddIcon /icons/text.gif .txt
+ 426 AddIcon /icons/c.gif .c
+ 427 AddIcon /icons/p.gif .pl .py
+ 428 AddIcon /icons/f.gif .for
+ 429 AddIcon /icons/dvi.gif .dvi
+ 430 AddIcon /icons/uuencoded.gif .uu
+ 431 AddIcon /icons/script.gif .conf .sh .shar .csh .ksh .tcl
+ 432 AddIcon /icons/tex.gif .tex
+ 433 AddIcon /icons/bomb.gif core
+ 434 AddIcon /icons/back.gif ..
+ 435 AddIcon /icons/hand.right.gif README
+ 436 AddIcon /icons/folder.gif ^^DIRECTORY^^
+ 437 AddIcon /icons/blank.gif ^^BLANKICON^^
+ 438 DefaultIcon /icons/unknown.gif
+ 439 ReadmeName README.html
+ 440 HeaderName HEADER.html
+ 441 IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
+ 442
+ 443 AddLanguage ca .ca
+ 444 AddLanguage cs .cz .cs
+ 445 AddLanguage da .dk
+ 446 AddLanguage de .de
+ 447 AddLanguage el .el
+ 448 AddLanguage en .en
+ 449 AddLanguage eo .eo
+ 450 AddLanguage es .es
+ 451 AddLanguage et .et
+ 452 AddLanguage fr .fr
+ 453 AddLanguage he .he
+ 454 AddLanguage hr .hr
+ 455 AddLanguage it .it
+ 456 AddLanguage ja .ja
+ 457 AddLanguage ko .ko
+ 458 AddLanguage ltz .ltz
+ 459 AddLanguage nl .nl
+ 460 AddLanguage nn .nn
+ 461 AddLanguage no .no
+ 462 AddLanguage pl .po
+ 463 AddLanguage pt .pt
+ 464 AddLanguage pt-BR .pt-br
+ 465 AddLanguage ru .ru
+ 466 AddLanguage sv .sv
+ 467 AddLanguage zh-CN .zh-cn
+ 468 AddLanguage zh-TW .zh-tw
+ 469 LanguagePriority en ca cs da de el eo es et fr he hr it ja ko ltz nl nn no pl pt pt-BR ru sv zh-CN zh-TW
+ 470 ForceLanguagePriority Prefer Fallback
+ 471 AddDefaultCharset UTF-8
+ 472
+ 473 <IfModule mod_negotiation.c>
+ 474     <IfModule mod_include.c>
+ 475         <Directory "error">
+ 476             AllowOverride None
+ 477             Options IncludesNoExec
+ 478             AddOutputFilter Includes html
+ 479             AddHandler type-map var
+ 480             Order allow,deny
+ 481             Allow from all
+ 482             LanguagePriority en es de fr
+ 483             ForceLanguagePriority Prefer Fallback
+ 484         </Directory>
+ 485     </IfModule>
+ 486 </IfModule>
+ 487
+ 488 BrowserMatch "Mozilla/2" nokeepalive
+ 489 BrowserMatch "MSIE 4\.0b2;" nokeepalive downgrade-1.0 force-response-1.0
+ 490 BrowserMatch "RealPlayer 4\.0" force-response-1.0
+ 491 BrowserMatch "Java/1\.0" force-response-1.0
+ 492 BrowserMatch "JDK/1\.0" force-response-1.0
+ 493 BrowserMatch "Microsoft Data Access Internet Publishing Provider" redirect-carefully
+ 494 BrowserMatch "MS FrontPage" redirect-carefully
+ 495 BrowserMatch "^WebDrive" redirect-carefully
+ 496 BrowserMatch "^WebDAVFS/1.[0123]" redirect-carefully
+ 497 BrowserMatch "^gnome-vfs/1.0" redirect-carefully
+ 498 BrowserMatch "^XML Spy" redirect-carefully
+ 499 BrowserMatch "^Dreamweaver-WebDAV-SCM1" redirect-carefully
+ 500
+ 501 #Uncomment following for enabling https based key serving
+ 502 #for HLS.
+ 503 #Include conf/httpd-hls-secure.conf
+ 504
+ 505
+ 506
+ 507 =========
+ 508
+ 509
+ 510
+ 511
+ 512
+ 513    1  su passwd
+ 514     2  passwd
+ 515     3  sudo passwd
+ 516     4  su passwd
+ 517     5  passwd
+ 518     6  locate adobe
+ 519     7  yum install locate
+ 520     8  df -h
+ 521     9  cd /mnt/
+ 522    10  ls
+ 523    11  cd applications/
+ 524    12  ls
+ 525    13  cd ..
+ 526    14  cd webroot/
+ 527    15  ls
+ 528    16  cd ..
+ 529    17  cd /usr/share/locale/n
+ 530    18  /
+ 531    19  cd /opt/adobe/ams/
+ 532    20  [root@ip-10-252-134-152 mnt]#
+ 533    21  [root@ip-10-252-134-152 mnt]# cd /opt/adobe/
+ 534    22  ams/ tmp/
+ 535    23  ls
+ 536    24  nano
+ 537    25  yum install nano
+ 538    26  nano /etc/ssh/sshd_config
+ 539    27  nano /etc/ssh/sshd_config
+ 540    28  /etc/init.d/sshd restart
+ 541    29  passwd
+ 543    31  passwd root
+ 544    32  nano /etc/ssh/sshd_config
+ 545    33  sudo su
+ 546    34  yum install sudo
+ 547    35  sudo su
+ 548    36  cd /mnt/
+ 549    37  ls
+ 550    38  cd applications/
+ 551    39  ls
+ 552    40  cd ..
+ 553    41  cd /opt/adobe/ams
+ 554    42  ls
+ 555    43  cd conf/
+ 556    44  ls
+ 557    45  cd _defaultRoot_/
+ 558    46  ls
+ 559    47  cd ..
+ 560    48  nano Users.xml
+ 561    49  cd Server.xml
+ 562    50  nano Server.xml
+ 563    51  cd _defaultRoot_/
+ 564    52  ls
+ 565    53  cd _defaultVHost_/
+ 566    54  ls
+ 567    55  nano Vhost.xml
+ 568    56  nano Application.xml
+ 569    57  cd ..
+ 570    58  cd ..
+ 571    59  ls
+ 572    60  nano Users.xml
+ 573    61  nano Users.xml
+ 574    62  /etc/init.d/ams restart
+ 575    63  ls
+ 576    64  nano Users.xml
+ 577    65  nano ams.ini nnn
+ 578    66  nano ams.ini
+ 579    67  /etc/init.d/ams stop
+ 580    68  /etc/init.d/ams start
+ 581    69  top
+ 582    70  tail -f /var/log/messages
+ 583    71  cd /opt/adobe/ams/
+ 584    72  ./amsadmin -console -user admin
+ 585    73  cd conf/
+ 586    74  nano Users.xml
+ 587    75  nano Users.xml
+ 588    76  nano Server.xml
+ 589    77  /etc/init.d/ams stop
+ 590    78  cd ..
+ 591    79  ./amsadmin -console -user admin
+ 592    80  nano conf/ams.ini
+ 593    81  /etc/init.d/ams start
+ 594    82  nano conf/ams.ini
+ 595    83  /etc/init.d/ams stop
+ 596    84  ./amsadmin -console -user admin
+ 597    85  nano conf/Users.xml
+ 598    86  ./amsadmin -console -user bruno
+ 599    87  nano conf/Users.xml
+ 600    88  cd conf/
+ 601    89  ls
+ 602    90  cd _defaultRoot_/
+ 603    91  ls
+ 604    92  cd _defaultVHost_/
+ 605    93  ls
+ 606    94  cd ..
+ 607    95  c ..
+ 608    96  cd ..
+ 609    97  cd ..
+ 610    98  /etc/init.d/ams start
+ 611    99  passwd
+ 612   100  useradd bruno
+ 613   101  passwd
+ 614   102  cd /etc/
+ 615   103  ls
+ 616   104  nano shadown
+ 617   105  passwd bruno
+ 618   106  passwd
+ 619   107  nano shadown
+ 620   108  lasttr
+ 621   109  chattr -i shadown
+ 622   110  passwd bruno
+ 623   111  passwd
+ 624   112  chattr -i passwd
+ 625   113  passwd
+ 626   114  lsattr shadown
+ 627   115  lsattr passwd
+ 628   116  sudo passwd
+ 629   117  ls -la
+ 630   118  cat passwd-
+ 631   119  cat passwd
+ 632   120  nano passwd
+ 633   121  nano passwd
+ 634   122  passwd
+ 635   123   cd /opt/adobe/tmp/
+ 636   124  ls
+ 637   125  cd ..
+ 638   126  cd ams/
+ 639   127  ls
+ 640   128  ./amsadmin -console -user admin
+ 641   129  ./amsadmin -console -user bruno
+ 642   130  ./adminserver -console -user bruno
+ 643   131  cd conf/
+ 644   132  nano Users.xml
+ 645   133  cp Users.xml Users.xml2
+ 646   134  nano Users.xml
+ 647   135  /etc/init.d/ams restart
+ 648   136  tail -f /var/log/messages
+ 649   137  find / -name "Users.xml"
+ 650   138  nano /opt/adobe/ams/conf/Users.xml
+ 651   139  /etc/init.d/ams restart
+ 652   140  nano /opt/adobe/ams/conf/Users.xml
+ 653   141  /etc/init.d/ams restart
+ 654   142  nano /opt/adobe/ams/conf/Users.xml
+ 655   143  history
+ 656   144  nano /opt/adobe/ams/conf/Users.xml
+ 657   145  cd /opt/adobe/ams/ls -l
+ 658   146  cd /opt/adobe/ams/
+ 659   147  ls -l
+ 660   148  ./amsmgr restart
+ 661   149  ./amsmgr getAdmin
+ 662   150  ./amsmgr adminserver restart
+ 663   151  tailf /var/log/messages
+ 664   152  nano /var/log/messages
+ 665   153  nano /opt/adobe/ams/conf/Server.xml
+ 666   154  nano /opt/adobe/ams/conf/Server.xml
+ 667   155  nano conf/ams.ini
+ 668   156  ./amsmgr adminserver restart
+ 669   157  tailf /var/log/messages
+ 670   158  nano conf/ams.ini
+ 671   159  /etc/init.d/ams restart
+ 672   160  nano conf/ams.ini
+ 673   161  nano conf/Users.xml
+ 674   162  nano conf/ams.ini
+ 675   163  /etc/init.d/ams restart
+ 676   164  ./amsmgr adminserver restart
+ 677   165  ./amsmgr
+ 678   166  ./amsmgr getAdmin
+ 679   167  pwd
+ 680   168  ./amsmgr list
+ 681   169  netstat -an
+ 682   170  ./amsmgr list
+ 683   171  ./amsmgr
+ 684   172  ./amsadmin
+ 685   173  ./amsadmin --help
+ 686   174  ./amsadmin -conf
+ 687   175  ./amsadmin -console
+ 688   176  /etc/init.d/ams stop
+ 689   177  ./amsadmin -console
+ 690   178  ./amsmgr start
+ 691   179  ./amsmgr server stop
+ 692   180  ./amsmgr server 127.0.0.1 stop
+ 693   181  ./amsmgr server localhost stop
+ 694   182  ./amsmgr adminserver start
+ 695   183  ./amsadmin -console
+ 696   184  telnet localhost 1111
+ 697   185  yum install telnet -t
+ 698   186  yum install telnet -y
+ 699   187  telnet localhost 1111
+ 700   188  telnet localhost 1111
+ 701   189  ps -aux | grep ams
+ 702   190  nano conf/Server.xml
+ 703   191  killall ams
+ 704   192  killall amsadmin
+ 705   193  nano conf/Server.xml
+ 706   194  ps -aux | grep ams
+ 707   195  killall amsadmin
+ 708   196  ps -aux | grep ams
+ 709   197  kill -9 4139
+ 710   198  kill -9 286116
+ 711   199  kill -9 7212
+ 712   200  ps -aux | grep ams
+ 713   201  /etc/init.d/ams start
+ 714   202  ps -aux | grep ams
+ 715   203  ./amsmgr serveradmin start
+ 716   204  ./amsmgr adminserver start
+ 717   205  ps -aux | grep ams
+ 718   206  nano conf/Users.xml
+ 719   207  tailf /var/log/messages
+ 720   208  nano /opt/adobe/fms/conf/fms.ini
+ 721   209  nano /opt/adobe/ams/conf/ams.ini
+ 722   210  hisory
+ 723   211  history |grep serveradmin
+ 724   212  ./amsmgr serveradmin start
+ 725   213  ./amsmgr adminserver start
+ 726   214  nano /opt/adobe/ams/conf/ams.ini
+ 727   215  nano /opt/adobe/ams/conf/Users.xml
+ 728   216  /opt/adobe/ams/amsadmin -console -user admin
+ 729   217  nano /opt/adobe/ams/conf/ams.ini
+ 730   218  /opt/adobe/ams/amsadmin -console -user admin
+ 731   219  nano /opt/adobe/ams/conf/Users.xml
+ 732   220  ./amsmgr server ams restart
+ 733   221  /opt/adobe/ams/amsadmin -console -user admin
+ 734   222  /opt/adobe/ams/amsadmin -console -user kiko
+ 735   223  nano /opt/adobe/ams/conf/ams.ini
+ 736   224  /etc/init.d/ams stop
+ 737   225  ./amsadmin stop
+ 738   226  ps -aux | grep ma
+ 739   227  ps -aux | grep ams
+ 740   228  killall ams*
+ 741   229  ps -aux | grep ams
+ 742   230  kill -9 305564
+ 743   231  kill -9 305564
+ 744   232  kill -9 4643
+ 745   233  kill -9 4643
+ 746   234  ps -aux | grep ams
+ 747   235  ps -aux | grep ams
+ 748   236  nano /opt/adobe/ams/conf/ams.ini
+ 749   237  ./amsadmin -console -user admin
+ 750   238  nano /opt/adobe/ams/conf/Users.xml
+ 751   239  nano /opt/adobe/ams/conf/ams.ini
+ 752   240  ./amsadmin -console -user admin
+ 753   241  nano /opt/adobe/ams/conf/Users.xml
+ 754   242  ./amsadmin -console -user admin
+ 755   243  nano /opt/adobe/ams/conf/Users.xml
+ 756   244  ./amsadmin -console -user admin
+ 757   245  nano /opt/adobe/ams/conf/Users.xml
+ 758   246  ps -aux | grep ams
+ 759   247  ./amsmgr server ams restart
+ 760   248  nano /opt/adobe/ams/conf/Users.xml
+ 761   249  nano /opt/adobe/ams/conf/Users.xml
+ 762   250  nano /opt/adobe/ams/conf/ams.ini
+ 763   251  ps -aux | grep ams
+ 764   252  ./amsmgr adminserver restart
+ 765   253  ps -aux | grep ams
+ 766   254  history | grep ams server
+ 767   255  history | grep "
+ 768   256  nano /opt/adobe/ams/conf/ams.ini
+ 769   257  ./amsadmin -console -user admin
+ 770   258  ./amsmgr adminserver restart
+ 771   259  ./amsmgr server ams restart
+ 772   260  nano /opt/adobe/ams/conf/ams.ini
+ 773   261  ./amsadmin -console -user admin
+ 774   262  ./amsadmin -console -user admin
+ 775   263  ./amsmgr server ams restart./amsmgr adminserver restart
+ 776   264  ./amsmgr server ams restart
+ 777   265  yes | yum install mysql mysql-server
+ 778   266  nano install.sh
+ 779   267  sh instal
+ 780   268  sh install.sh
+ 781   269  rpm --import https://fedoraproject.org/static/0608B895.txt
+ 782   270  rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+ 783   271  rpm --import http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+ 784   272  rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+ 785   273  yes | yum install yum-priorities
+ 786   274  yes | yum update
+ 787   275  yum install pure-ftpd
+ 788   276  yum install pure-ftp
+ 789   277  yum --enable-repo=remi,remi-test install pure-ftpd
+ 790   278  yum --enablerepo=remi,remi-test install pure-ftpd
+ 791   279  yum -enablerepo=remi,remi-test install pure-ftpd
+ 792   280  cd /home/k
+ 793   281  cd /root/
+ 794   282  ls -l
+ 795   283  rpm --import https://fedoraproject.org/static/0608B895.txt
+ 796   284  wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-6.noarch.rpm
+ 797   285  rpm -ivh epel-release-6-6.noarch.rpm
+ 798   286  ls -l
+ 799   287  clear
+ 800   288  rpm --import https://fedoraproject.org/static/0608B895.txt
+ 801   289  wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-6.noarch.rpm
+ 802   290  rpm -ivh epel-release-6-6.noarch.rpm
+ 803   291  yum install pure-ftpd
+ 804   292  rpm --import https://fedoraproject.org/static/0608B895.txt
+ 805   293  rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+ 806   294  rpm --import http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+ 807   295  rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+ 808   296  clear
+ 809   297  rpm --import https://fedoraproject.org/static/0608B895.txt
+ 810   298  rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm
+ 811   299  rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+ 812   300   yum --nogpgcheck install epel-release-6-5.noarch.rpm
+ 813   301   yum --nogpgcheck install epel-release-6-8.noarch.rpm
+ 814   302   yum --nogpgcheck install epel-release-6-7.noarch.rpm
+ 815   303  uname -a
+ 816   304  cat /et/*elease
+ 817   305  cat /etc/*elease
+ 818   306  rpm -ivh http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm
+ 819   307  rpm --import http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+ 820   308  rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-5.rpm
+ 821   309  yum install pure-ftpd
+ 822   310  y
+ 823   311  y
+ 824   312  y
+ 825   313  mysql
+ 826   314  /etc/init.d/mysqld restart
+ 827   315  chkconfig mysql on
+ 828   316  clear
+ 829   317  /etc/init.d/mysqld restart
+ 830   318  chkconfig mysqld on
+ 831   319  clear
+ 832   320  chkconfig pure-ftpd on
+ 833   321  cd /root/
+ 834   322  ls -l
+ 835   323  nano instal
+ 836   324  nano install.sh
+ 837   325  nano instalar.sh
+ 838   326  sh install.sh
+ 839   327  nano install.sh
+ 840   328  sh install.sh
+ 841   329  mysql
+ 842   330  cd /mnt/applications/
+ 843   331  ls -l
+ 844   332  id ams
+ 845   333  cd live
+ 846   334  ls -l
+ 847   335  pwd
+ 848   336  INSERT INTO ftpd (User, status, Password, Uid, Gid, Dir, ULBandwidth, DLBandwidth, comment, ipaccess, QuotaSize, QuotaFiles) VALUES ('fms_Admin', '1', MD5('Ha20hXh2'     ),
+ 849
+ 850 '500', '500', '/mnt/applications/', '0', '0', '', '*', '0', '0');
+ 851   337  mysql
+ 852   338  ifconfig
+ 853   339  iptables -.
+ 854   340  iptables -LL
+ 855   341  iptables -L
+ 856   342  nano /etc/pure-ftpd/pure-ftpd.conf
+ 857   343  service pure-ftpd restart
+ 858   344  nano /etc/pure-ftpd/pure-ftpd.conf
+ 859   345  service pure-ftpd restart
+ 860   346  nano /etc/pure-ftpd/pure-ftpd.conf
+ 861   347  service pure-ftpd restart
+ 862   348  exit
+ 863   349  top
+ 864   350  /etc/init.d/ams stop
+ 865   351  cd /opt/adobe/ams/
+ 866   352  ls
+ 867   353  cd conf/
+ 868   354  nano ams.ini
+ 869   355  mv Users.xml Users.xml3
+ 870   356  nano Users.xml
+ 871   357  /etc/init.d/ams start
+ 872   358  cd
+ 873   359  wget http://www.brunomarques.com/setup/instalar.sh
+ 874   360  sh instalar.sh
+ 875   361  cd /mnt/applications/
+ 876   362  ls -l
+ 877   363  ls -l vod/
+ 878   364  find / -name vod
+ 879   365  find / -name 100002169264740.flv
+ 880   366  cd /mnt/applications/vod/streams/_definst_
+ 881   367  ln -s /mnt/applications/vod/streams/_definst_/100002169264740.flv 100002169264740.flv
+ 882   368  ls -l 100002169264740.flv
+ 883   369  pwd
+ 884   370  ls
+ 885   371  ls -l
+ 886   372  chmod 755 100002169264740.flv
+ 887   373  ls -l
+ 888   374  ps aux
+ 889   375  ls -l
+ 890   376  pwd
+ 891   377  cd /etc
+ 892   378  ls
+ 893   379  cd pure-ftpd/
+ 894   380  ls -l
+ 895   381  cat pure-ftpd.conf
+ 896   382  /etc/ht
+ 897   383  ps aux
+ 898   384  locale http
+ 899   385  find / -name http
+ 900   386  find / -name apache
+ 901   387  ps aux | grep http
+ 902   388  cd /opt/adobe/ams/Apache2.2/
+ 903   389  ls -l
+ 904   390  cd bin/
+ 905   391  ls -l
+ 906   392  cat httpd
+ 907   393
+ 908   397  ls -l
+ 909   398  pwd
+ 910   399  find / -name 100002169264740.flv
+ 911   400  find / -name 100002169264740.flv
+ 912   401  cd /
+ 913   402  find / -name 100002169264740.flv
+ 914   403  cd /mnt/applications/vod/
+ 915   404  ls -l
+ 916   405  pwd
+ 917   406  history
+ 918   407  find / -name vod
+ 919   408  ls -l  /mnt/applications/vod
+ 920   409  ls -l  /mnt/applications/vod/media/
+ 921   410  find / -name flv
+ 922   411  find / -name *.flv
+ 923   412  cp /mnt/applications/vod/streams/_definst_/100002169264740.flv /mnt/webroot/vod/
+ 924   413  df -h
+ 925   414  cd /mnt/applications/vod/streams/_definst_/
+ 926   415  ls -l
+ 927   416  cd /mnt/webroot/vod/
+ 928   417  ln -s /mnt/applications/vod/streams/_definst_/ http
+ 929   418  ls -l
+ 930   419  cd http/
+ 931   420  ls-l
+ 932   421  ls -l
+ 933   422  ls -l
+ 934   423  pwd
+ 935   424  ls -l
+ 936   425  pwd
+ 937   426  cd ..
+ 938   427  ls -l
+ 939   428  pwd
+ 940   429  cd http/
+ 941   430  ls -l
+ 942   431  chmod 755 *
+ 943   432  ls -l
+ 944   433  cd ..
+ 945   434  ls -l
+ 946   435  pwd
+ 947   436  cd http/
+ 948   437  ls -l
+ 949   438  cd /mnt/
+ 950   439  ls -l
+ 951   440  ps -aux | grep apache
+ 952   441  ps -aux | grep htt
+ 953   442  ls -l
+ 954   443  cd applications/
+ 955   444  ls -l
+ 956   445  cd vod/
+ 957   446  ls -l
+ 958   447  cd media/
+ 959   448  ls -l
+ 960   449  cd ..
+ 961   450  ls -l
+ 962   451  cd streams/
+ 963   452  ls -l
+ 964   453  cd _definst_/
+ 965   454  ls -l
+ 966   455  pwd
+ 967   456  httpd -I
+ 968   457  find / -name "httpd.conf"
+ 969   458  ls -l
+ 970   459  ls -l mnt/applications/vod/streams/_definst_
+ 971   460  ls -l mnt/applications/vod/streams/_definst_/
+ 972   461  ls -l /mnt/applications/vod/streams/_definst_/
+ 973   462  ls -l
+ 974   463  pwd
+ 975   464  nano /opt/adobe/ams/Apache2.2/conf/httpd.conf
+ 976   465  ls -l
+ 977   466  cd ..
+ 978   467  ls -l
+ 979   468  cd ..
+ 980   469  ls -l
+ 981   470  cd ..
+ 982   471  ls -l
+ 983   472  history
+ 984   473  ls -l
+ 985   474  nano /etc/pure-ftpd/pure-ftpd.conf
+ 986   475  cat /etc/*release
+ 987   476  mysql
+ 988   477  mysql
+ 989   478  ls /mnt/applications/vod/streams/_definst_
+ 990   479  ls /mnt/applications/vod/streams/_definst_ -la
+ 991   480  ls /mnt/applications/vod/streams/_definst_ -lan
+ 992   481  ls -la /mnt/applications/vod/streams/
+ 993   482  ls -la /mnt/applications/vod/
+ 994   483  chmod o+rx /mnt/applications/vod/streams/_definst_
+ 995   484  tail -20 /root/.mysql_history
+ 996   485  tail -200f /var/log/messages
+ 997   486  ifconfig
+ 998   487  vim /etc/pure-ftpd/pureftpd-mysql.conf
+ 999   488  vim /etc/pure-ftpd/pure-ftpd.conf
+1000   489  /etc/init.d/pure-ftpd restart
+1001   490  ls
+1002   491  ls /mnt/applications/vod/streams/_definst_ -lan
+1003   492  tail -20 /root/.mysql_history
+1004   493  chmod o-w /mnt/applications/vod/streams/_definst_
+1005   494  chown 501 /mnt/applications/vod/streams/_definst_
+1006   495  ls -la
+1007   496  ls -la /mnt/applications/vod/streams/_definst_
+1008   497  tail -20 /root/.mysql_history
+1009   498  ls -la /mnt/applications/vod/streams/_definst_
+1010   499  chown 500 /mnt/applications/vod/streams/_definst_
+1011   500  g+x /mnt/applications/vod/streams/_definst_
+1012   501  chmod g+x /mnt/applications/vod/streams/_definst_
+1013   502  mount
+1014   503  chmod g+x /mnt/applications/vod/streams/_definst_
+1015   504  chmod g-w /mnt/applications/vod/streams/_definst_
+1016   505  vim /etc/passwd
+1017   506  vim /etc/group
+1018   507  tail -20 /root/.mysql_history
+1019   508  tail -200 /var/log/pureftpd.log
+1020   509  tail -200 /var/log/messages
+1021   510  vim /etc/pure-ftpd/pureftpd-mysql.conf
+1022   511  mysql
+1023   512  vim /etc/pure-ftpd/pureftpd-mysql.conf
+1024   513  vim /etc/pure-ftpd/pureftpd-mysql.conf
+1025   514  mysql
+1026   515  exit
+1027   516  mysql
+1028   517  mysql
+1029   518  chmod a+rx /mnt/applications/vod/streams/_definst_
+1030   519  ls -la /mnt/applications/vod/streams/_definst_
+1031   520  chmod o+r /mnt/applications/vod/streams/_definst_/*
+1032   521  chgrp 5000 /mnt/applications/vod/streams/_definst_ -R
+1033   522  chmod 655 /mnt/applications/vod/streams/_definst_
+1034   523  ls -la /mnt/applications/vod/streams/_definst_
+1035   524  chmod 744 /mnt/applications/vod/streams/_definst_
+1036   525  ls -la /mnt/applications/vod/streams/_definst_
+1037   526  chmod 755 /mnt/applications/vod/streams/_definst_
+1038   527  ls -la /mnt/applications/vod/streams/_definst_
+1039   528  mysql
+1040   529  chmod o-r /mnt/applications/vod/streams/_definst_/*
+1041   530  chmod o-x /mnt/applications/vod/streams/_definst_
+1042   531  vim /etc/pure-ftpd/pure-ftpd.conf
+1043   532  chown 5000 /mnt/applications/vod/streams/_definst_
+1044   533  tail -20 /root/.mysql_history
+1045   534  exit
+1046   535  useradd fms_access -u5000 -s/dev/null
+1047   536  ls /home/
+1048   537  tail -20 /root/.mysql_history
+1049   538  exit
+1050   539  chown 500:500 /mnt/applications/vod/streams/_definst_
+1051   540  chown 500:500 /mnt/applications/vod/streams/_definst_ -R
+1052   541  selinuxenabled && echo ok
+1053   542  ls -la /mnt/applications/vod/streams/_definst_
+1054   543  mysql
+1055   544  ls -la  /mnt/applications/vod/
+1056   545  ls -la  /mnt/applications/vod/streams
+1057   546  chmod o+rx  /mnt/applications/vod/streams
+1058   547  chmod o+rx  /mnt/applications/vod/streams/_definst_
+1059   548  chmod o+rx  /mnt/applications/vod/streams/_definst_ -la
+1060   549  ls -la /mnt/applications/vod/streams/_definst_ -la
+1061   550  chmod o+rx  /mnt/applications/vod/streams/_definst_/ -R
+1062   551  ls -la /mnt/applications/vod/streams/_definst_ -la
+1063   552  chmod o=r /mnt/applications/vod/streams/_definst_/ -la
+1064   553  chmod o=r /mnt/applications/vod/streams/_definst_/*
+1065   554  ls -la /mnt/applications/vod/streams/_definst_ -la
+1066   555  ls -la /mnt/applications/vod/streams -la
+1067   556  mysql
+1068   557  ls
+1069   558  netstat -pnlt
+1070   559  httpd -S
+1071   560  ps -efwww | grep httpd
+1072   561  /opt/adobe/ams/Apache2.2/bin/httpd -S
+1073   562  vim /opt/adobe/ams/Apache2.2/conf/httpd.conf
+1074   563  tail -20 /root/.mysql_history
+1075   564  mysql
+1076   565  ls -l /mnt/applications/vod/streams/_definst_/
+1077   566  ls -l
+1078   567  ls -l /mnt/applications/vod/streams/_definst_/
+1079   568  vim /etc/pure-ftpd/pure-ftpd.conf
+1080   569  cd /mnt/applications/vod/streams/_definst_/
+1081   570  ls
+1082   571  ls -la
+1083   572  vim /etc/pure-ftpd/pure-ftpd.conf
+1084   573  chmod o+r*
+1085   574  chmod o+r *
+1086   575  ls -la
+1087   576  vim /etc/pure-ftpd/pure-ftpd.conf
+1088   577  /etc/init.d/pure-ftpd restart
+1089   578  netstat -pnlt
+1090   579  ps -efww | grep pure
+1091   580  /etc/init.d/pure-ftpd stop
+1092   581  /etc/init.d/pure-ftpd start
+1093   582  vim /etc/pure-ftpd/pure-ftpd.conf
+1094   583  /etc/init.d/pure-ftpd stop
+1095   584  /etc/init.d/pure-ftpd start
+1096   585  vim /etc/ssh/sshd_config
+1097   586  /etc/init.d/sshd restart
+1098   587  vim /etc/issue
+1099   588  vim /etc/issue.net
+1100   589  vim /etc/motd
+1101   590  echo -e "\e[21m;Servidor fora do padrao\e[0m;"
+1102   591  echo -e "\e[21mServidor fora do padrao\e[0m"
+1103   592  echo -e "\e[31mServidor fora do padrao\e[0m"
+1104   593  echo -e "\e[32mServidor fora do padrao\e[0m"
+1105   594  echo -e "\e[12mServidor fora do padrao\e[0m"
+1106   595  echo -e "\e[41mServidor fora do padrao\e[0m"
+1107   596  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[51mtictacfms\e[0m"
+1108   597  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[31mtictacfms\e[0m"
+1109   598  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[35mtictacfms\e[0m"
+1110   599  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[36mtictacfms\e[0m"
+1111   600  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[2mtictacfms\e[0m"
+1112   601  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[3mtictacfms\e[0m"
+1113   602  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[4mtictacfms\e[0m"
+1114   603  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[5mtictacfms\e[0m"
+1115   604  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[5mtictacfms\e[21m"
+1116   605  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[10mtictacfms\e[21m"
+1117   606  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[10mtictacfms\e[0m"
+1118   607  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[31mtictacfms\e[0m"
+1119   608  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[11mtictacfms\e[0m"
+1120   609  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[12mtictacfms\e[0m"
+1121   610  for i in `seq 40`; do echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[$imtictacfms\e[0m$i\n"; done
+1122   611  for i in `seq 40`; do echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[${i}mtictacfms\e[0m$i\n"; done
+1123   612  for i in `seq 10 60`; do echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[${i}mtictacfms\e[0m$i\n"; done
+1124   613  for i in `seq 10 60`; do echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[${i};10mtictacfms\e[0m$i\n"; done
+1125   614  for i in `seq 10 60`; do echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[${i};31mtictacfms\e[0m$i\n"; done
+1126   615  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[41:42mtictacfms\e[0m"
+1127   616  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[41;42mtictacfms\e[0m"
+1128   617  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[42;41mtictacfms\e[0m"
+1129   618  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[31;41mtictacfms\e[0m"
+1130   619  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[32;41mtictacfms\e[0m"
+1131   620  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[47;41mtictacfms\e[0m"
+1132   621  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[41;47mtictacfms\e[0m"
+1133   622  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[31;47mtictacfms\e[0m"
+1134   623  echo -e "\e[42mServidor fora do padrao\n\e[0mNome: \e[31;47mtictacfms\e[0m" >> /etc/motd
+1135   624  passwd
+1136   625  chattr +a /etc/motd
+1137   626  chattr -a /etc/motd
+1138   627  vim /etc/motd
+1139   628  cat /etc/shadown
+1140   629  cat /etc/ssh/sshd_config
+1141   630  cat /etc/passwd
+1142   631  for i in devil marcio bhuke kleber cmagadan
+1143   632  groupadd ananke -u 2000
+1144   633  groupadd -u 2000 ananke
+1145   634  groupadd -g 2000 ananke
+1146   635  for i in devil marcio bhuke kleber cmagadan; do useradd -m -s /bin/bash -G ananke $i; done
+1147   636  passwd devil
+1148   637  grep devil /etc/shadown
+1149   638  grep devil /etc/shadown
+1150   639  grep devil /etc/passwd
+1151   640  for i in devil marcio bhuke kleber cmagadan; do usermod -p'z1Yj2PI74h73Y' $i; done
+1152   641  grep bhuke /etc/passwd
+1153   642  passwd bhuke
+1154   643  grep bhuke /etc/passwd
+1155   644  vim /etc/pure-ftpd/pureftpd-mysql.conf
+1156   645  vim /etc/pure-ftpd/pure-ftpd.conf
+1157   646  cd /mnt/applications/vod/streams/_definst_/
+1158   647  ls
+1159   648  ls -la
+1160   649  chmod o+w *flv
+1161   650  ls -la
+1162   651  chmod o-w *flv
+1163   652  chmod o+r *flv
+1164   653  pwd
+1165   654  vim /etc/crontab
+1166   655  top
+1167   656  ls -la /mnt/applications/vod/streams/_definst_/
+1168   657  yum install incrond
+1169   658  yum install incrond
+1170   659  yum install incron
+1171   660  cat /etc/crontab
+1172   661  chmod o+r /mnt/applications/vod/streams/_definst_/*flv
+1173   662  ls -la /mnt/applications/vod/streams/_definst_/
+1174   663  ps -efwww | grep cron
+1175   664  ps -efwww | grep cron
+1176   665  vim /etc/crontab
+1177   666  ls /var/log/messages
+1178   667  du  -sh /var/log/messages
+1179   668  yum install vixie-cron -y
+1180   669  chkconfig crond on
+1181   670  ls -la /etc/crontab
+1182   671  grep chmod /etc/crontab
+1183   672  cat /etc/passwd
+1184   673  cd /root/
+1185   674  ls -l
+1186   675  cat instal
+1187   676  cat instalar.sh
+1188   677  pwd
+1189   678  cd /etc
+1190   679  ls
+1191   680  ps aux
+1192   681  netstat -anp | grep "LISTEN "
+1193   682  cat /etc/issue
+1194   683  service status alll
+1195   684  service status all
+1196   685  history
+1197   686  history > /home/kleber/his.txt
+1198
+
