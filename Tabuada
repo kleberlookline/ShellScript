@@ -1,0 +1,35 @@
+# cat tabuada2_ok.sh
+#!/bin/bash
+
+echo -n "Digite um numero para fazer a tabuada: "
+read valor_digitado
+
+$valor_digitado;
+        for i in $(seq 1 10);
+                do echo $i x $valor_digitado = $(($i * $valor_digitado)) ;
+                        done
+
+#a=10;for i in $(seq 1 10); do echo $i x $a = $(($i * $a)) ;done
+
+
+echo -n "outra forma de tabuar:"
+read valor2_digitado
+
+terceiracasa=100
+valorzero=0
+valordez=10
+valorvinte=20
+valortrinta=30
+valorquarenta=40
+valorcinquenta=50
+valorsessenta=60
+valorsetenta=70
+valarooitenta=80
+valornoventa=90
+valorcem=100
+
+seq=`seq $valorzero $valor2_digitado $terceiracasa`
+
+        if [ ]
+
+seq 0 2 20
