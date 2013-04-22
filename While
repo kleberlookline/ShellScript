@@ -1,0 +1,11 @@
+# cat while.sh
+#!/bin/bash
+
+contador=1
+        while [ $contador -ne 5 ];
+
+do
+    echo "Messagem exibida $contador vez".
+        sleep 1;
+                ((contador=$contador+1))
+done
