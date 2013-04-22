@@ -1,0 +1,19 @@
+# cat portalweb.sh
+#!/bin/bash
+
+host=179.521.10.124
+usuario=portalweb
+senha=Zex342
+tmp=/home/vhosts/webcron/
+diretoriodest=/home/vhosts/webcron/domains/public_html/sites/files/xml-import-tv
+
+#tmp=/home/marcio/tmp/
+#diretoriodest=/home/marcio/destino/
+
+arquivo="*.xml"
+
+wget ftp://$usuario:$senha@$host/$arquivo -P $tmp || ( echo "erro ao baixar arquivo"  ; exit 1)
+
+`mv /home/vhosts/webcron/domains/webcronclaro.clientes.ananke.com.br/webcron/*.xml /home/vhosts/webcron/domains/webcronclaro.clientes.ananke.com.br/public_html/sites/files/xml-import-tv/`
+
+chown pureftpd:pureftpd $tmp $diretoriodest -R
