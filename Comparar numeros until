@@ -1,0 +1,14 @@
+# cat sejalivre.sh
+#!/bin/bash
+# Exibe 20 linhas com o conteudo do echo
+
+clear
+let i=2
+
+#Se a variavel i for maior que 20 ele para
+        until [ $i -gt 21 ];
+        do
+        echo 'kleber oliveira'
+
+let i=$i+1;
+done
