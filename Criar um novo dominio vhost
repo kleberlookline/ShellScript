@@ -1,0 +1,114 @@
+# cat add_domain.sh
+#!/bin/sh
+#
+# Tabajara script for add domain
+# Bye pog master but3k4 <claudio@anankeit.com.br>
+# Version 0.04
+#
+ENABLE_SITE=$(which a2ensite)
+APACHEDIR="/etc/apache2/sites-available"
+RESTART_CMD="/etc/init.d/apache2 reload"
+RESTART_OPTS=""
+MYSQL_FTP_OPTS="mysql -upureftpd -pftpsecret -D pureftpd"
+MYSQL_DB_OPTS="mysql -uroot -pSENHADOMYSQL"
+FLUSH_CMD="echo flush privileges"
+MODEL_DIR="/root/scripts/model"
+
+echo -n dominio:
+read DOMINIO
+
+echo -n usuario:
+read USUARIO
+
+echo -n senha:
+read SENHA
+
+echo -n "Gostaria de criar o banco de dados? (y/n) [Y]: "
+read BANCO
+
+DIR="/home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html"
+SELECT_USER="select User from users where User='$USUARIO'"
+INSERT_USER="insert into users (User,Password,Dir,Clearpass) values('$USUARIO',MD5('$SENHA'),'$DIR','$SENHA');"
+
+if [ $(echo "$SELECT_USER" | $MYSQL_FTP_OPTS) ]; then
+        echo "Ja existe um usuario com este login"
+        exit;
+elif [ -f ${APACHEDIR}/${DOMINIO} ] ; then
+        echo "Este dominio ja esta configurado no servidor."
+        exit;
+else
+        echo "$INSERT_USER" | $MYSQL_FTP_OPTS
+        if [ "$?" = "0" ]; then
+                echo "usuário adicionado com sucesso"
+        fi
+        if [ "$BANCO" == "Y" -o "$BANCO" == "y" -o -z "$BANCO" ]; then
+                BD=$(echo $DOMINIO | sed 's/\./_/g')
+                echo "create database $BD" | $MYSQL_DB_OPTS
+                if [ "$?" = "0" ]; then
+                        echo "database criada com sucesso"
+                else
+                        echo "erro ao criar a database"
+                fi
+
+                echo "grant all privileges on $BD.* to '$USUARIO'@'%' identified by '$SENHA'" | $MYSQL_DB_OPTS
+                if [ "$?" = "0" ]; then
+                        echo "privilegios do banco realizados com sucesso"
+                else
+                        echo "erro ao fornecer os privilegios a database"
+                fi
+
+                $FLUSH_CMD | $MYSQL_DB_OPTS
+        fi
+        mkdir -p /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/{images,stats}
+        #cp -a ${MODEL_DIR}/{background.jpg,img_ananke.gif} /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/images/
+        #cp -a ${MODEL_DIR}/index.html /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/
+        mkdir -p /var/log/vhosts/${USUARIO}
+        chown -R pureftpd:pureftpd /home/vhosts/${USUARIO}
+        chown -R root:root /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/stats
+
+        cat > ${APACHEDIR}/${DOMINIO} <<EOF
+# # # ${DOMINIO} # # #
+#
+<VirtualHost *:80>
+        ServerName www.${DOMINIO}
+        ServerAlias ${DOMINIO}
+        DocumentRoot /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html
+
+        <Directory "/home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html">
+                Options FollowSymLinks MultiViews
+                AllowOverride AuthConfig FileInfo Limit
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+php_admin_value open_basedir /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/:/tmp/
+
+        #ErrorDocument 404 http://www.${DOMINIO}/errors/404.html
+        ErrorLog /var/log/vhosts/${USUARIO}/${DOMINIO}_error_log
+        CustomLog /var/log/vhosts/${USUARIO}/${DOMINIO}_access_log combined
+        AddType application/x-httpd-php .php .php3
+        AddType application/x-httpd-php-source .phps
+        AddType text/html .shtml
+        AddHandler server-parsed .shtml
+        AddHandler cgi-script .cgi
+        AddHandler cgi-script .pl
+
+        ScriptAlias /cgi-bin /home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/cgi-bin
+        <Directory "/home/vhosts/${USUARIO}/domains/${DOMINIO}/public_html/cgi-bin">
+                AllowOverride AuthConfig
+                Options ExecCGI
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+</VirtualHost>
+
+EOF
+
+        $ENABLE_SITE $DOMINIO 1> /dev/null
+        $RESTART_CMD $RESTART_OPTS
+
+        echo -n "O dominio foi adicionado com os seguintes dados: "
+        echo "dominio: $DOMINIO, usuario de ftp, mysql: $USUARIO, usando a senha: $SENHA"
+        echo
+fi
