@@ -108,5 +108,3 @@ echo
 df -h
 echo
 echo
-
-root@srv-debian01-gato:~/scripts#
