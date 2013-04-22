@@ -1,0 +1,19 @@
+# cat comp_numeros_aceito.sh
+#!/bin/bash
+
+echo -n "Digite um numero menor que 9: "
+read valor_digitado
+
+        if [ "$valor_digitado" -eq "3" ];
+        then
+        echo "voce digitou o numero 3"
+                elif [ "$valor_digitado" -eq "4" ]
+                then
+                echo "voce digitou o numero 4"
+                        elif [ "$valor_digitado" -eq "5" ]
+                        then
+                        echo "voce digitou o numero 5"
+        else
+        echo "voce digitou nenhum numero aceito"
+echo
+fi
