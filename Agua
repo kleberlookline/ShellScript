@@ -1,0 +1,42 @@
+# cat agua
+#!/bin/bash
+
+# Operadores Relacionais
+# ==    Igual
+# !=    Diferente
+# >     Maior
+# >=    Maior ou Igual
+# <     Menor
+# <=    Menor ou Igual
+
+nao="nao"
+sim="sim"
+
+echo -n "Bebeu agua? - [sim|nao]"
+read valor_agua1
+echo
+if [ $valor_agua1 ==  $nao ]
+        then
+        echo -n "Tah com sede? - [sim|nao] "
+        read valor_agua2
+fi
+                        if [ $valor_agua2 ==  $sim ]
+                                then
+                                echo "Olha, olha, olha, olha a agua mineral!"
+                                sleep 2
+                                echo "agua mineral!!"
+                                sleep 2
+                                echo "agua mineral!!!"
+                                sleep 1
+                                echo "agua mineral!!!!"
+                                sleep 1
+                                echo "agua mineral!!!!!"
+                                echo "Do Candeaaaaaaal"
+                                sleep 1
+                                echo "Voce vai ficar legaaaal!!!!!!!"
+                        fi
+
+                        if [ $valor_agua1 == $sim ]
+                                then
+                                echo "Entao ta BOM fiiiii !!!"
+                        fi
