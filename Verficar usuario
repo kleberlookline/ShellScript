@@ -1,0 +1,69 @@
+#cat verif_user_cria_dir_ok.sh
+#!/bin/bash
+
+clear
+date +'%d/%m/20%y %H:%M:%S'
+echo
+echo
+
+#script base com algumas informacoes para ajudar na programacao
+
+#Comparacao matematica          Comparacao em Script
+#5 == 6                         If [ 5 -eq 6 ]  igual
+#5 != 6                         If [ 5 -ne 6 ]  diferente
+#5 < 6                          If [ 5 -lt 6 ]  menor
+#5 <= 6                         If [ 5 -le 6 ]  menor ou igual
+#5 > 6                          If [ 5 -gt 6 ]  maior
+#5 >= 6                         If [ 5 -ge 6 ]  maior ou igual
+
+#Operadores Relacionais
+#Operadores Relacionais
+#==     Igual
+#!=     Diferente
+#>      Maior
+#>=     Maior ou Igual
+#<      Menor
+#<=     Menor ou Igual
+
+
+#Operadores Logicos
+#
+#&& ---> E logico (AND)
+#|| ---> OU logico (OR)
+#
+#&&  ---> Verdadeiro se tanto a e b sao verdadeiros ao mesmo tempo
+#||  ---> Verdadeiro se a ou b sao verdadeiros
+
+
+
+#!  (nao) - Verdadeiro se a nao eh verdadeiro
+#
+#A=10
+#
+#if ! [ $A == 5 ]
+#then
+#               echo "Verdadeiro, a variavel $A nÃ£eh igual a 5"
+#else
+#               echo "Falso, a variavel $A eh igual a 5"
+
+DIRETORIOBLABLA=`ls -l /home/kleber/* | grep blabla | sed s'/://'`
+
+if [ "$USER" == 'root' ]
+        then
+                echo $USER este usuario eh o administrador
+
+                        if [ "$DIRETORIOBLABLA" == '/home/kleber/blabla' ]
+                                then
+                                        echo nao vou criar o diretorio blabla ele ja existe!
+                                        echo
+                                else
+                                        mkdir /home/kleber/blabla
+                                        echo foi criado o diretorio blabla caminho: /home/kleber/blabla
+                                        echo
+                fi
+fi
+
+if [ "$USER" != root ]
+                then
+                        echo voce nao eh o usuario admin
+fi
