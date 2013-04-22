@@ -1,0 +1,15 @@
+# cat casamento.sh
+#!/bin/bash
+
+echo -n "Digite o valor em conta corrente:"
+read valor_digitado
+echo
+if [ "$valor_digitado" -gt "3000" ]
+
+        then
+                echo "Faca o casamento na igreja da Seh!!"
+
+        else
+                echo "Economize para outros fins..."
+        fi
+echo
