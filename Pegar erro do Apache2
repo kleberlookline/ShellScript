@@ -1,0 +1,4 @@
+# cat erro-apache.sh
+(apache2ctl -t &&
+service apache2 restart || (l=$(apache2ctl -t 2>&1|head -n1|sed 's/.*line\s\([0-9]*\).*/\1/');
+vim +$l $(locate apache2.conf | head -n1)))
