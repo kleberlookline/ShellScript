@@ -1,0 +1,143 @@
+  1 #!/bin/bash
+  2 #
+  3 # Firewall tabajara by claudio <claudio@ananke.com.br>
+  4 #
+  5 EXT_IPS="174.34.230.92"
+  6 LO_IP="127.0.0.1"
+  7 EXT_IF="eth0"
+  8 INT_IF=""
+  9 INT_IP=""
+ 10 LO_IF="lo"
+ 11
+ 12 OFFICE1="177.103.195.125"
+ 13 OFFICE2="189.78.155.219"
+ 14 CAROSUPPORT="64.132.46.100/27"
+ 15
+ 16
+ 17 ALLOWED_SSH="${OFFICE1} ${OFFICE2} ${MONITORAMENTO} 200.98.197.86"
+ 18
+ 19 ALLOWED_MYSQL="${OFFICE1} ${OFFICE2} 201.52.212.91 189.121.32.128 189.33.83.109 177.61.147.199 189.121.35.137 189.33.85.61 187.105.246.1 201.52.210.30 186.204.183.244 186.20    4.177.224 201.52.211.35 189.7.242.195 189.111.117.55 187.105.244.134 186.220.184.78 177.33.20.229 177.183.131.79 177.183.134.157 187.66.8.247 189.33.90.133 187.39.103.242 18    7.66.9.138 177.64.182.26 201.52.210.75 189.121.201.249 177.183.133.234 177.183.128.23 189.121.203.183 177.183.136.121 186.204.115.163 189.121.206.41 187.66.10.92 189.0.55.17    5 187.39.99.202 189.33.90.2 187.66.11.164 187.64.220.185 187.66.27.213 173.236.34.30 173.236.34.26 173.236.34.27 173.236.34.28 173.236.34.29 108.163.255.194 177.183.133.248     201.53.206.252 189.33.83.213 177.183.134.254 177.183.128.99 177.183.130.197 187.10.157.33 201.82.139.177 201.82.137.72"
+ 20
+ 21 INPUT_PORTS="21 80 443"
+ 22
+ 23 #MONITORAMENTO="201.20.12.182 201.20.12.201"
+ 24
+ 25 MONITORAMENTO="201.20.12.182 177.52.129.182 177.52.129.201"
+ 26
+ 27
+ 28 IPTABLES="/sbin/iptables"
+ 29 MODPROBE="/sbin/modprobe"
+ 30
+ 31
+ 32 firewall_start()
+ 33 {
+ 34 # Mudando politica
+ 35 ${IPTABLES} -P INPUT DROP
+ 36
+ 37 # Carregando Modulos
+ 38 ${MODPROBE} ip_conntrack_ftp
+ 39 ${MODPROBE} ip_nat_ftp
+ 40
+ 41 # Regras Input
+ 42 for IP in ${LO_IP} ${INT_IP} ${EXT_IPS}; do
+ 43         ${IPTABLES} -A INPUT -i ${LO_IF} -s ${IP} -j ACCEPT
+ 44 done
+ 45
+ 46 ${IPTABLES} -A INPUT -p icmp --icmp-type echo-request -m limit --limit 5/s -j ACCEPT
+ 47 ${IPTABLES} -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+ 48
+ 49 for PORT in ${INPUT_PORTS}; do
+ 50         ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --dport ${PORT} -j ACCEPT
+ 51         ${IPTABLES} -A INPUT -p udp -i ${EXT_IF} --dport ${PORT} -j ACCEPT
+ 52 #       ${IPTABLES} -A INPUT -p tcp -i ${INT_IF} --dport ${PORT} -j ACCEPT
+ 53 #       ${IPTABLES} -A INPUT -p udp -i ${INT_IF} --dport ${PORT} -j ACCEPT
+ 54 done
+ 55
+ 56 # Aceitando conexao para o mysql
+ 57 for SRC in ${ALLOWED_MYSQL}; do
+ 58 #       ${IPTABLES} -A INPUT -p tcp -i ${INT_IF} -s ${SRC} --dport 3306 -j ACCEPT
+ 59         ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} -s ${SRC} --dport 3306 -j ACCEPT
+ 60 done
+ 61
+ 62 # Aceitando SSH
+ 63 for SRC in ${ALLOWED_SSH}; do
+ 64         ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} -s ${SRC} --dport 13000 -j ACCEPT
+ 65 #       ${IPTABLES} -A INPUT -p tcp -i ${INT_IF} -s ${SRC} --dport 13000 -j ACCEPT
+ 66 done
+ 67
+ 68 # Liberando acesso as maquinas de monitoramento
+ 69 for IP in ${MONITORAMENTO}; do
+ 70         for DST in ${INT_IP} ${EXT_IPS}; do
+ 71                 ${IPTABLES} -A INPUT -p tcp -s ${IP} -d ${DST} -j ACCEPT
+ 72                 ${IPTABLES} -A INPUT -p udp -s ${IP} -d ${DST} -j ACCEPT
+ 73         done
+ 74 done
+ 75
+ 76 # Dificultando Nmap
+ 77 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags ALL FIN,URG,PSH -j DROP
+ 78 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+ 79 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags ALL ALL -j DROP
+ 80 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags ALL FIN -j DROP
+ 81 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags RST RST -j DROP
+ 82 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags SYN,RST SYN,RST -j DROP
+ 83 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags SYN,FIN SYN,FIN -j DROP
+ 84 ${IPTABLES} -A INPUT -p tcp -i ${EXT_IF} --tcp-flags ALL NONE -j DROP
+ 85
+ 86 # Bloqueando Input
+ 87 ${IPTABLES} -A INPUT -p icmp -m state --state INVALID -j DROP
+ 88 ${IPTABLES} -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+ 89 ${IPTABLES} -A INPUT -p tcp --syn -j DROP
+ 90
+ 91 #${IPTABLES} -A INPUT -j DROP
+ 92
+ 93 ${IPTABLES} -N LOGDROP
+ 94 ${IPTABLES} -A LOGDROP -j LOG
+ 95 ${IPTABLES} -A LOGDROP -j DROP
+ 96
+ 97 ${IPTABLES} -A INPUT -j LOGDROP
+ 98
+ 99
+100 #${IPTABLES} -A INPUT -j DROP
+101
+102
+103 # Protecao contra ataques Smurf
+104 #
+105 echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+106
+107 # Protecao contra synflood
+108 #
+109 if [ -f /proc/sys/net/ipv4/tcp_syncookies ]; then
+110         echo "1" > /proc/sys/net/ipv4/tcp_syncookies
+111 fi
+112
+113 }
+114
+115 firewall_stop()
+116 {
+117 ${IPTABLES} -P INPUT ACCEPT
+118 ${IPTABLES} -F
+119 ${IPTABLES} -X
+120 ${IPTABLES} -Z
+121 }
+122
+123 firewall_restart()
+124 {
+125 firewall_stop
+126 sleep 1
+127 firewall_start
+128 }
+129
+130 case "$1" in
+131 'start')
+132   firewall_start
+133   ;;
+134 'stop')
+135   firewall_stop
+136   ;;
+137 'restart')
+138   firewall_restart
+139   ;;
+140 *)
+141   echo "usage $0 start|stop|restart"
+142 esac
+143
