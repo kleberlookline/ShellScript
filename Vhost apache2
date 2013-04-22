@@ -1,0 +1,36 @@
+# cat erika.clientes.com.br
+# # # erika.clientes.com.br # # #
+#
+<VirtualHost *:80>
+        ServerName www.erika.clientes.com.br
+        ServerAlias erika.clientes.com.br www.erika.com.br erika.com.br
+        DocumentRoot /home/vhosts/erika/domains/erika.clientes.com.br/public_html
+
+        <Directory "/home/vhosts/erika/domains/erika.clientes.com.br/public_html">
+                Options FollowSymLinks MultiViews
+                AllowOverride AuthConfig FileInfo Limit
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+php_admin_value open_basedir /home/vhosts/erika/domains/erika.clientes.com.br/public_html/:/tmp/
+
+        #ErrorDocument 404 http://www.erika.clientes.com.br/errors/404.html
+        ErrorLog /var/log/vhosts/erika/erika.clientes.com.br_error_log
+        CustomLog /var/log/vhosts/erika/erika.clientes.com.br_access_log combined
+        AddType application/x-httpd-php .php .php3
+        AddType application/x-httpd-php-source .phps
+        AddType text/html .shtml
+        AddHandler server-parsed .shtml
+        AddHandler cgi-script .cgi
+        AddHandler cgi-script .pl
+
+        ScriptAlias /cgi-bin /home/vhosts/erika/domains/erika.clientes.com.br/public_html/cgi-bin
+        <Directory "/home/vhosts/erika/domains/erika.clientes.com.br/public_html/cgi-bin">
+                AllowOverride AuthConfig
+                Options ExecCGI
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+</VirtualHost>
