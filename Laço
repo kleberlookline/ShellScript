@@ -1,0 +1,10 @@
+# cat laco.sh
+#!/bin/bash
+
+#limite_contador=4
+
+for contador in {1..10};
+        do
+                 echo "Messagem exibida $contador vez".
+                        sleep 1;
+done
