@@ -1,0 +1,13 @@
+# cat check_file.sh
+#!/bin/bash
+
+echo 'Digite o caminho absoluto do arquivo'
+read
+
+        if [ $? = 0 ]
+        then
+                echo 'O arquivo existe'
+        else
+                echo 'O arquivo nao existe'
+        fi
+
