@@ -1,0 +1,22 @@
+# cat cores.sh
+#!/bin/bash
+
+cor_casa=VERDE
+
+echo A cor da casa $cor_casa
+
+echo -n "Digite algo:"
+
+read valor_digitado
+
+if [ "$valor_digitado" -eq "3" ];
+
+then
+
+ echo Voce digitou o nunero 3
+
+else
+
+ echo " voce digitou o caracter $valor_digitado";
+
+fi
