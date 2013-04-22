@@ -1,0 +1,175 @@
+Script para o squid:
+arquivo:adm
+conteudo:kleber
+
+cat banned.list
+faceboook.com
+youtube.com
+uol.com
+terra.com
+
+cat bloqueados
+facebook.com
+youtube.com
+xvideos.com
+terra.com.br
+uol.com.br
+g1.com.br
+
+cat palavras
+videos
+porno
+porn
+
+cat passwd
+kleber:N6AaC.guODtwo
+rafael:uYvop3DNiXHMM
+carlos:twwz4mY8j4qFc
+
+vi squid.conf
+  1 http_port 3128
+  2 hierarchy_stoplist cgi-bin?
+  3 acl QUERY urlpath_regex cgi-bin?
+  4 #no_cache deny QUERY
+  5 #cache_mem 100 MB
+  6 #cache_dir ufs /cache 2100 16 256
+  7 #cache_access_log /var/lib/squid/logs/access.log
+  8 #cache_log /var/lib/squid/logs/cache.log
+  9 #cache_store_log /var/lib/squid/logs/store.log
+ 10 auth_param basic program /usr/libexec/ncsa_auth /etc/squid/passwd
+ 11 auth_param basic children 5
+ 12 auth_param basic realm Squid proxy-caching web server
+ 13 auth_param basic credentialsttl 2 hours
+ 14 auth_param basic casesensitive off
+ 15 refresh_pattern ^ftp:           1440    20%     10080
+ 16 refresh_pattern ^gopher:        1440    0%      1440
+ 17 refresh_pattern .               0       20%     4320
+ 18 acl all src 0.0.0.0/0.0.0.0
+ 19 acl manager proto cache_object
+ 20 acl localhost src 127.0.0.1/255.255.255.255
+ 21 acl to_localhost dst 127.0.0.0/8
+ 22 acl SSL_ports port 443 563
+ 23 acl Safe_ports port 80
+ 24 acl Safe_ports port 21
+ 25 acl Safe_ports port 25
+ 26 acl Safe_ports port 443 563
+ 27 acl Safe_ports port 70
+ 28 acl Safe_ports port 210
+ 29 acl Safe_ports port 110
+ 30 acl Safe_ports port 210
+ 31 acl Safe_ports port 1025-65535
+ 32 acl Safe_ports port 280
+ 33 acl Safe_ports port 488
+ 34 acl Safe_ports port 591
+ 35 acl Safe_ports port 777
+ 36 acl CONNECT method CONNECT
+ 37 acl rede_interna src 192.168.1.0/255.255.255.0
+ 38 acl adm proxy_auth "/etc/squid/adm"
+ 39 acl user1 proxy_auth "/etc/squid/usuarios/user1"
+ 40 acl user2 proxy_auth "/etc/squid/usuarios/user2"
+ 41 #acl user3 proxy_auth "/etc/squid/usuarios/user3"
+ 42 #acl user4 proxy_auth "/etc/squid/usuarios/user4"
+ 43 #acl user5 proxy_auth "/etc/squid/usuarios/user5"
+ 44 #acl user6 proxy_auth "/etc/squid/usuarios/user6"
+ 45 #acl user7 proxy_auth "/etc/squid/usuarios/user7"
+ 46 #acl user8 proxy_auth "/etc/squid/usuarios/user8"
+ 47 #acl user9 proxy_auth "/etc/squid/usuarios/user9"
+ 48 acl permit_user1 url_regex -i "/etc/squid/acessos/user1"
+ 49 acl permit_user2 url_regex -i "/etc/squid/acessos/user2"
+ 50 #acl permit_user3 url_regex -i "/etc/squid/acessos/user3"
+ 51 #acl permit_user4 url_regex -i "/etc/squid/acessos/user4"
+ 52 #acl permit_user5 url_regex -i "/etc/squid/acessos/user5"
+ 53 #acl permit_user6 url_regex -i "/etc/squid/acessos/user6"
+ 54 #acl permit_user7 url_regex -i "/etc/squid/acessos/user7"
+ 55 #acl permit_user8 url_regex -i "/etc/squid/acessos/user8"
+ 56 #acl permit_user9 url_regex -i "/etc/squid/acessos/user9"
+ 57 http_access allow manager localhost
+ 58 http_access deny manager
+ 59 http_access deny !Safe_ports
+ 60 http_access deny CONNECT !SSL_ports
+ 61 http_access allow adm rede_interna
+ 62 http_access allow user1 permit_user1 rede_interna
+ 63 http_access allow user2 permit_user2 rede_interna
+ 64 #http_access allow user3 permit_user3 rede_interna
+ 65 #http_access allow user4 permit_user4 rede_interna
+ 66 #http_access allow user5 permit_user5 rede_interna
+ 67 #http_access allow user6 permit_user6 rede_interna
+ 68 #http_access allow user7 permit_user7 rede_interna
+ 69 #http_access allow user8 permit_user8 rede_interna
+ 70 #http_access allow user9 permit_user9 rede_interna
+ 71 #http_access allow user10 permit_user10 rede_interna
+ 72 #http_access allow user11 permit_user11 rede_interna
+ 73 #http_access allow user12 permit_user12 rede_interna
+ 74 #http_access allow user13 permit_user13 rede_interna
+ 75 #http_access allow user14 permit_user14 rede_interna
+ 76 #http_access allow user15 permit_user15 rede_interna
+ 77 #http_access allow user16 permit_user16 rede_interna
+ 78 #http_access allow user17 permit_user17 rede_interna
+ 79 #http_access allow user18 permit_user18 rede_interna
+ 80 #http_access allow user19 permit_user19 rede_interna
+ 81 http_access deny all
+ 82 http_reply_access allow all
+ 83 icp_access allow all
+
+
+---------------------------------
+
+
+vi squid.conf (Original)
+  1 #Porta default do proxy
+  2 http_port 3128
+  3
+  4 #O nome do servidor
+  5 visible_hostname proxydomal
+  6
+  7 #Cache
+  8 #cache_mem 64 mb
+  9 #maximum_object_size_in_memory 64 kb
+ 10 #cache_swap_low 90
+ 11 #cache_swap_high 95
+ 12 #cache_dir ufs /var/spool/squid 2048 16 256
+ 13 #cache_access_log /var/log/squid/access.log
+ 14 #refresh_pattern ^ftp: 15 20% 2280
+ 15 #refresh_pattern ^gopher: 15 0% 2280
+ 16 #refresh_pattern . 15 20% 2280
+ 17
+ 18 #Regras de acesso para rede local
+ 19 acl manager proto cache_object
+ 20 acl localhost src 127.0.0.1 192.168.1.121
+ 21 #acl marcio src 192.168.1.87
+ 22 acl SSL_ports port 443 563
+ 23 acl Safe_ports port 80 #http
+ 24 acl Safe_ports port 21 #ftp
+ 25 acl Safe_ports port 70 #gopher
+ 26 acl Safe_ports port 210 #wais
+ 27 acl Safe_ports port 280 #http-mgmt
+ 28 acl Safe_ports port 488 #gss-http
+ 29 acl Safe_ports port 591 #filemaker
+ 30 acl Safe_ports port 777 #multiling http
+ 31 acl Safe_ports port 901 #swat
+ 32 acl Safe_ports port 443 563 #https e snews
+ 33 acl Safe_ports port 1025-65535 #portas altas
+ 34 acl purge method PURGE
+ 35 acl CONNECT method CONNECT
+ 36 http_access allow manager localhost
+ 37 http_access deny manager
+ 38 http_access allow purge localhost
+ 39 http_access deny purge
+ 40 http_access deny !Safe_ports
+ 41 http_access deny CONNECT !SSL_ports
+ 42
+ 43 #Bloqueando por dominios e palavras
+ 44 acl bloqueados dstdom_regex "/etc/squid/bloqueados"
+ 45 http_access deny bloqueados
+ 46 acl palavras url_regex "/etc/squid/palavras"
+ 47 http_access deny palavras
+ 48 error_directory /usr/share/squid/errors/Portuguese
+ 49
+ 50 acl redelocal src 192.168.1.73 192.168.1.72
+ 51 http_access allow redelocal
+ 52 http_access allow localhost
+ 53 #http_access allow marcio
+ 54 acl all src 192.168.1.73 192.168.1.72
+ 55 http_access deny all
+
+
