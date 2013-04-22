@@ -1,0 +1,83 @@
+root@srv-debian01-gato:~/scripts/ananke-scripts# cat check_update.pl
+#!/usr/bin/perl -w
+#
+# um simples programa para verificar se existe atualizacao de
+# pacotes nos sistemas debian, caso exista, o mesmo manda emails
+# informando quais pacotes precisam ser atualizados e suas
+# respectivas versoes.
+#
+# para usar, instale o pacote:
+# apt-get install -y libmime-lite-perl
+#
+use strict;
+
+$ENV{'PATH'} = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
+
+my $hostname = 'devassa';
+my $mail_from = 'updates@ananke.com.br';
+my @mail_to = ('sysl@ananke.com.br');
+my $smtp_server = 'smtp-shared02.ananke.com.br';
+my $debug = 1;
+my $msg;
+
+my @apt = `apt-get update`;
+&errorUpdateApt if ($? ne 0);
+
+my @pkg_list = `apt-get dist-upgrade -s`;
+&errorGetPkgList if ($? ne 0);
+
+if (scalar(@pkg_list) > 4) {
+        print "Existem atualizacoes disponiveis para os seguintes pacotes:\n\n" if ($debug);
+        $msg = "Existem atualizacoes disponiveis para os seguintes pacotes:\n\n";
+        foreach my $line (@pkg_list) {
+                if ($line =~ /^Inst (.*) \[(.*)\] \((.*) debian.*$/i) {
+                        printf ("%s, versao %s\n",$1, $2) if ($debug);
+                        $msg .= sprintf ("%s, versao %s\n",$1, $2);
+                } elsif ($line =~ /^Inst (.*) \((.*) debian.*$/i) {
+                        printf ("novo pacote a ser instalado: %s, versao %s\n",$1, $2) if ($debug);
+                        $msg .= sprintf ("novo pacote a ser instalado: %s, versao %s\n",$1, $2);
+                }
+        }
+        &sendEmail("Atualizacoes disponiveis");
+}
+
+sub errorUpdateApt() {
+        my $subject = "Erro ao rodar o apt-get update";
+        my $message = "Erro ao rodar o apt-get update, favor verificar";
+        &sendEmail($subject, $message);
+        exit;
+}
+
+sub errorGetPkgList() {
+        my $subject = "Erro ao tentar baixar a lista de pacotes\n";
+        my $message = "Erro ao tentar baixar a lista de pacotes, favor verificar";
+        &sendEmail($subject, $message);
+        exit;
+}
+
+sub sendEmail($$) {
+        my $subject = shift;
+        my $error_msg = shift;
+        my $email;
+        use MIME::Lite;
+        foreach my $to_addr (@mail_to) {
+                if ($msg) {
+                        $email = MIME::Lite->new(
+                                From    => $mail_from,
+                                To      => $to_addr,
+                                Subject => $hostname . ': ' . $subject,
+                                Type    => "text/plain",
+                                Data    => $msg,
+                                );
+                } else {
+                        $email = MIME::Lite->new(
+                                From            => $mail_from,
+                                To              => $to_addr,
+                                Subject         => $hostname . ': ' . $subject,
+                                Type    => "text/plain",
+                                Data            => $error_msg
+                                );
+                }
+                $email->send('smtp', "$smtp_server", Timeout => 60);
+        }
+}
