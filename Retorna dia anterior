@@ -1,0 +1,42 @@
+# cat retorna_dia_anterior.sh
+# Funcao em Shell Script para retornar a data anterior, levando em conta o mes e ano.
+
+fn_data_anterior()
+{
+        DIA=$D
+        MES=$M
+        ANO=$A
+
+# Dado DIA, MES e ANO numericos, obtem a data do dia anterior
+        DIA=`expr $DIA - 1`
+        if [ $DIA -eq 0 ]; then
+                MES=`expr $MES - 1`
+                if [ $MES -eq 0 ]; then
+                        MES=12
+                        ANO=`expr $ANO - 1`
+                fi
+                DIA=`cal $MES $ANO`
+                DIA=`echo $DIA | awk '{ print $NF }'`
+        fi
+}
+
+ano=`date +%Y`;
+mes=`date +%m`;
+let dia=10\#`date +%d`;
+
+if (( $dia<10 ));
+  then
+    j=0$dia;
+else
+    j=$dia;
+fi
+dia=$j;
+j="";
+
+D=$dia
+M=$mes
+A=$ano
+
+fn_data_anterior
+
+echo $DIA $MES
