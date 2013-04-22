@@ -1,0 +1,78 @@
+  1 #!/bin/bash
+  2
+  3 #    i=1 quer dizer que o valor inicial da variÃ¡l i vai ser 1. Lembre-se de nÃ£adicionar nenhum espaÃ§entre a variÃ¡l e o "=" e tambÃ©entre o "=" e o valor a ser atribuÃ­.
+  4 #    i <= 100 quer dize que, enquanto o valor da variÃ¡l "i" for menor que 100, os comandos dentro do for serÃ£executados.
+  5 #    i++ quer dizer que vocÃªstÃ¡ncrementando em 1 o valor da variÃ¡l "i" a cada laÃ§executado (cada vez que completa as operaÃ§s dentro do for).
+  6
+  7
+  8 for ((b=1; b<5; b++)); do echo "$b"; done
+  9 #1
+ 10 #2
+ 11 #3
+ 12 #4
+ 13
+ 14
+ 15 for ((b=1; b>-5; b--)); do echo "$b"; done
+ 16 #1
+ 17 #0
+ 18 #-1
+ 19 #-2
+ 20 #-3
+ 21 #-4
+ 22
+ 23
+ 24 for ((b=5; b>=-5; b--)); do echo "$b"; done
+ 25 #5
+ 26 #4
+ 27 #3
+ 28 #2
+ 29 #1
+ 30 #0
+ 31 #-1
+ 32 #-2
+ 33 #-3
+ 34 #-4
+ 35 #-5
+ 36
+ 37
+ 38 for ((b=-5; b>=-5; b--)); do echo "$b"; done
+ 39 #-5
+ 40
+ 41
+ 42 ####
+ 43
+ 44
+ 45 #WHILE
+ 46
+ 47 #O while um comando muito parecido com o for. Enquanto uma condicao for verdadeira, ele executara; os  comandos dentro do laco a  sintaxe assim:
+ 48
+ 49 #while <condicao; do
+ 50 #   <comando>1
+ 51 #   <comando>2
+ 52 #   <comando>n
+ 53 #done
+ 54
+ 55 #Vamos ver como exemplo uma transformacao do exemplo anterior. Ele estava assim:
+ 56
+ 57 #for((i=1; i <= 100; i++));
+ 58 #   do
+ 59 #      echo "$i"
+ 60 #   done
+ 61
+ 62 #Usando "while" ao inves de  "for" fica assim:
+ 63
+ 64 #i=1
+ 65 #while [ i -le 100 ]; do
+ 66 #   echo "$i"
+ 67 #done
+ 68
+ 69
+ 70
+ 71
+ 72
+~
+~
+~
+~
+~
+~
