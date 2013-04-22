@@ -1,0 +1,41 @@
+# cat restore-de-banco-mysql.sh
+#!/bin/bash
+
+# Script Created By Andrew Zwieg 2-26-2012
+# Backs up MySQL Dump Directory From a Remote Server, and then from there Places on  Local system in "MySQL" directory, and finally restores into MySQL.
+
+
+##################################################################
+# copies the FTP Directory to the Root folder Remove # to enable #
+##################################################################
+
+# scp  root@IP-OF-SERVER:/Backup-MySQL/* /MySQL
+
+#############################
+# Rsyncs after original SCP #
+#############################
+
+#rsync -ave root@IP-OF-SERVER:/Backup-MySQL/* /MySQL
+
+#########################################
+# Restores MySQL Backup into MySQL Database    #
+#########################################
+
+echo -n "Qual o nome do usuario para restore do banco? "
+read username
+
+echo -n "Digite a senha do usuario: "
+read userpasswd
+
+echo -n "Nome do banco para fazer o restore, Caso ele nao exista sera criado automaticamente: "
+read nomedobanco
+
+echo -n "Qual eh o arquivo para usar no restore do banco, digite o caminho absoluto do arquivo: "
+read restorebackup
+mysql -u $username -p$userpasswd $nomedobanco < $restorebackup
+
+
+
+# This Is the End Of The Script
+
+# Go Andy!
