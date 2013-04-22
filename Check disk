@@ -1,0 +1,112 @@
+# cat check_disk_ok.sh
+#!/bin/bash
+
+# script que pega em porcentagem o tamanho usado das particoes e soma
+# caso o volume somado seja maior que o limite setado na condicao if
+# o script vai apagar o diretorio ja setado na condicao then
+# gerando um log do horario da exclusao em /var/log/exclusao
+# caso contrario enviara a mensagem HD vazio
+# e por ultimo executa um ls -> esta linha pode ser comentada pois nao influencia na ideia do codigo
+
+# Autor:
+# kleber pereira - BSL
+# Email: kleber.lookline@gmail.com - data 16/01/2013
+
+
+#script base com algumas informacoes para ajudar na programacao
+
+#Comparacao matematica          Comparacao em Script
+#5 == 6                         If [ 5 -eq 6 ]  igual
+#5 != 6                         If [ 5 -ne 6 ]  diferente
+#5 < 6                          If [ 5 -lt 6 ]  menor
+#5 <= 6                         If [ 5 -le 6 ]  menor ou igual
+#5 > 6                          If [ 5 -gt 6 ]  maior
+#5 >= 6                         If [ 5 -ge 6 ]  maior ou igual
+
+
+#Operadores Logicos
+#
+#&& ---> E logico (AND)
+#|| ---> OU logico (OR)
+#
+#&&  ---> Verdadeiro se tanto a e b sao verdadeiros ao mesmo tempo
+#||  ---> Verdadeiro se a ou b sao verdadeiros
+
+
+
+#!  (nao) - Verdadeiro se a nao eh verdadeiro
+#
+#A=10
+#
+#if ! [ $A == 5 ]
+#then
+#               echo "Verdadeiro, a variavel $A nÃ£eh igual a 5"
+#else
+#               echo "Falso, a variavel $A eh igual a 5"
+
+
+
+
+
+
+ARQUIVOLOG=`/var/log/exclusao.log`
+TAMANHOARQUIVODELOG=`du -sh /var/log/exclusao.log | awk {'print $1'} | sed "s/K//g"`
+TIME=`date +%Y%m%d%s`
+TAMANHODODISCO1=`df -h | grep /dev/sda1 | awk {'print $5'} | sed "s/%//g"`
+TAMANHODODISCO2=`df -h | grep /dev/sda2 | awk {'print $5'} | sed "s/%//g"`
+TAMANHODODISCO3=`df -h | grep /dev/sda3 | awk {'print $5'} | sed "s/%//g"`
+#NOMEARQUIVOGZ=`gzip -f -9 $ARQUIVOLOG`
+
+
+
+clear
+
+
+echo
+echo
+                echo Valor usado da particao /dev/sda1 em porcentagem
+                echo $TAMANHODODISCO1 %
+echo
+echo
+                echo Valor usado da particao /dev/sda2 em porcentagem
+                echo $TAMANHODODISCO2 %
+echo
+echo
+                echo Valor usado da particao /dev/sda3 em porcentagem
+                echo $TAMANHODODISCO3 %
+echo
+echo
+
+                TOTAL=`echo $(($TAMANHODODISCO3+$TAMANHODODISCO2+$TAMANHODODISCO1))`
+                echo Soma do valor usado das particoes em porcentagem $TOTAL %
+
+echo
+echo
+
+if [ $TOTAL -gt 30 ]
+
+then
+        rm -vrf /root/scripts/REMOVER-CHEIO >> /var/log/exclusao.log
+        date +'%d/%m/20%y %H:%M:%S' >> /var/log/exclusao.log
+        echo
+        echo removido o arquivo REMOVER-CHEIO para Liberar espaco na particao
+        echo
+        echo Foi gerado um log em | tr a-z A-Z && echo /var/log/exclusao.log && echo para registrar a exclusao do arquivo | tr a-z A-Z
+else
+        echo Hd esta vazio
+        echo
+        echo nao foi necessario remover nada para liberar espaco
+        echo
+fi
+
+echo
+echo
+
+ls -lh --color
+echo
+echo
+df -h
+echo
+echo
+
+root@srv-debian01-gato:~/scripts#
