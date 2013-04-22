@@ -1,0 +1,32 @@
+# cat pegar_processo.sh
+#!/bin/bash
+
+#clear
+#echo
+#        echo Deseja PARAR qual servico agora?
+#                read servico1
+#                         /etc/init.d/$servico1 stop
+
+#Comparacao matematica          Comparacao em Script
+#5 == 6                         If [ 5 -eq 6 ]  igual
+#5 != 6                         If [ 5 -ne 6 ]  diferente
+#5 < 6                          If [ 5 -lt 6 ]  menor
+#5 <= 6                         If [ 5 -le 6 ]  menor ou igual
+#5 > 6                          If [ 5 -gt 6 ]  maior
+#5 >= 6                         If [ 5 -ge 6 ]  maior ou igual
+
+
+clear
+echo
+        echo Deseja pegar o numero de processo de qual servico?
+                read servico1
+
+PEGARPROCESSO=`ps aux | grep $servico1 | awk {'print $2'} | head -n1`
+        echo $PEGARPROCESSO
+echo
+        echo Caso queira desligar o servico digite abaixo o numero do processo:
+                read numero1
+                kill -9 $numero1
+
+echo
+        echo Servico $servico1 Desligado!!
