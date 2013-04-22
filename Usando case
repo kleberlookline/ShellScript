@@ -1,0 +1,36 @@
+# cat usando_case_ok.sh
+#!/bin/bash
+
+echo "Digite 1 ate o 9"
+read opcao;
+        case "$opcao"
+        in
+                "1")
+                        echo "voce digitou numero um";
+        ;;
+                "2")
+                        echo "voce digitou numero dois";
+        ;;
+                "3")
+                        echo "voce digitou numero tres";
+        ;;
+                "4")
+                        echo "voce digitou numero quatro";
+        ;;
+                "5")
+                        echo "voce digitou numero cinco";
+        esac
+
+if [ "$opcao" -eq "6" ]
+        then
+        echo este numero nao eh permitido
+                elif [ "$opcao" -eq "7" ]
+                then
+                echo este numero nae eh permitido
+                        elif [ "$opcao" -eq "8" ]
+                        then
+                        echo este numero nae eh permitido
+                                elif [ "$opcao" -eq "9" ]
+                                then
+                                echo este numero nae eh permitido
+fi
