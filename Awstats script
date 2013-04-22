@@ -1,0 +1,11 @@
+# cat awstats.sh
+#!/bin/sh
+#
+AWSTATS="/usr/lib/cgi-bin/awstats.pl"
+HOST="dominio.com.br"
+
+OUTPUT="/home/vhosts/dominio/domains/dominio.com.br/public_html/stats"
+
+${AWSTATS} -config=${HOST} -update > /dev/null
+${AWSTATS} -config=${HOST} -output > ${OUTPUT}/index.html
+
