@@ -1,0 +1,49 @@
+root@srv-debian01-gato:~/scripts# cat tabuada.sh
+#!/bin/bash
+
+principal()
+{
+escolha=-1
+while [ $escolha -ne 0 ];
+do
+    echo "Escolha uma opÃ§"
+    echo "1- Fazer tabuada do 2";
+    echo "2- Fazer tabuada do 3";
+    echo "0- Sair";
+
+    echo -n ":";
+
+    read escolha;
+
+    if [ "$escolha" -eq "1" ];
+        then
+         gerarTabuada2
+
+    elif [ "$escolha" -eq "2" ];
+        then
+         gerarTabuada3
+    fi
+
+done
+}
+
+gerarTabuada3()
+{
+
+for i in {1..10}; do
+ echo "$i*3="$i*3
+done
+
+}
+
+gerarTabuada2()
+{
+
+for i in {1..10}; do
+ echo "$i*2="$i*2
+done
+
+}
+
+principal
+
