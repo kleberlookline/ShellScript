@@ -1,0 +1,61 @@
+# cat start_stop_ok.sh
+#!/bin/bash
+clear
+echo
+echo
+        echo Deseja PARAR qual servico agora?
+                read servico1
+                         /etc/init.d/$servico1 stop
+echo
+echo
+
+        echo Deseja INICIAR qual servico agora?
+                read servico2
+                         /etc/init.d/$servico2 start
+echo
+echo
+        echo Deseja REINICIAR qual servico agora?
+                read servico3
+                         /etc/init.d/$servico3 restart
+echo
+echo
+echo
+
+
+VARIALVELPEGAOSERVICOON2=`ps -ef |  grep -o $servico2 | head -n3 | wc -l`
+VARIALVELPEGAOSERVICOON3=`ps -ef |  grep -o $servico3 | head -n3 | wc -l`
+
+MAIUSCULO2=`echo $servico2 | tr a-z A-Z`
+MAIUSCULO3=`echo $servico3 | tr a-z A-Z`
+
+if  [ $VARIALVELPEGAOSERVICOON2 -ge 3 ]
+then
+        echo Lista do servico $MAIUSCULO2 em execucao
+        ps aux | grep $servico2 --color
+        echo
+        echo
+        echo
+
+else
+        echo Este servico $servico2 nao esta funcionando verifique!!!
+
+fi
+
+echo
+echo
+
+if  [ $VARIALVELPEGAOSERVICOON3 -ge 3 ]
+then
+        echo Lista do servico $MAIUSCULO3 em execucao
+        ps aux | grep $servico3 --color
+        echo
+        echo
+        echo
+
+else
+        echo Este servico $servico3 nao esta funcionando verifique!!!
+
+fi
+
+
+#ps -ef | grep -o apache | head -n3 > /tmp/temporario.txt && cat /tmp/temporario.txt | head -n1 | tr a-z A-Z && sleep 1 && rm -rf /tmp/temporario.txt APACHE
