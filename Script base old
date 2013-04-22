@@ -1,0 +1,29 @@
+# cat script-base.sh.old
+#!/bin/bash
+clear
+date +'%d/%m/20%y %H:%M:%S'
+echo
+#script base com algumas informacoes para ajudar na programacao
+#Comparacao matematica          Comparacao em Script
+#5 == 6                         If [ 5 -eq 6 ]  igual
+#5 != 6                         If [ 5 -ne 6 ]  diferente
+#5 < 6                          If [ 5 -lt 6 ]  menor
+#5 <= 6                         If [ 5 -le 6 ]  menor ou igual
+#5 > 6                          If [ 5 -gt 6 ]  maior
+#5 >= 6                         If [ 5 -ge 6 ]  maior ou igual
+
+#Operadores Logicos
+#&& ---> E logico (AND)
+#|| ---> OU logico (OR)
+#&&  ---> Verdadeiro se tanto a e b sao verdadeiros ao mesmo tempo
+#||  ---> Verdadeiro se a ou b sao verdadeiros
+
+#!  (nao) - Verdadeiro se a nao eh verdadeiro
+#
+#A=10
+#
+#if ! [ $A == 5 ]
+#then
+#               echo "Verdadeiro, a variavel $A nÃ£eh igual a 5"
+#else
+#               echo "Falso, a variavel $A eh igual a 5"
