@@ -1,0 +1,26 @@
+  1 #!/usr/bin/env bash
+  2 DEBUG=0
+  3
+  4 Slave_IO_Running=`mysql -uroot -pSENHA -Bse "show slave status\G" | grep Slave_IO_Running | awk '{ print $2 }'`
+  5 Slave_SQL_Running=`mysql -uroot -pSENHA -Bse "show slave status\G" | grep Slave_SQL_Running | awk '{ print $2 }'`
+  6 Last_error=`mysql -uroot -pSENHA -Bse "show slave status\G" | grep Last_error | awk -F \: '{ print $2 }'`
+  7
+  8 if [ $Slave_IO_Running == 'Yes' ] && [ $Slave_SQL_Running == 'Yes' ] ; then
+  9         echo "Replication slave is running" ;
+ 10         echo OK > /root/scripts/slave.control
+ 11     exit 0
+ 12 fi
+ 13 if [ $Slave_SQL_Running == 'No' ] ; then
+ 14             echo "SQL thread not running on server !"
+ 15             echo "Last Error:" $Last_error
+ 16         echo BUG > /root/scripts/slave.control
+ 17     exit 1
+ 18 fi
+ 19 if [ $Slave_IO_Running == 'No' ] ; then
+ 20                         echo "LOG IO thread not running on server "
+ 21                         echo "Last Error:" $Last_error
+ 22         echo BUG > /root/scripts/slave.control
+ 23     exit 1
+ 24 fi
+ 25
+ 26
