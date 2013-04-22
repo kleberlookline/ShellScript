@@ -1,0 +1,305 @@
+#!/usr/bin/perl -w
+#
+# Copyright (c) 2008, Claudio Borges All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#    * Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+#    * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in
+#      the documentation and/or other materials provided with the
+#      distribution.
+#    * Neither the name of the Claudio Borges nor the names of its
+#      contributors may be used to endorse or promote products derived
+#      from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# To use this program, it's necessary flexbackup, rsync, mysqldump, DBI
+# and DBD::mysql modules. To install, use:
+#
+# apt-get install flexbackup afio buffer rsync libdbi-perl libdbd-mysql-perl libmime-lite-perl
+#
+# by Claudio Borges (claudio@onerd.com.br)
+# version 1.3
+# Ter Jul 22 09:29:54 BRT 2008
+#
+use strict;
+use vars qw($msg);
+
+my $init_time = $^T;
+
+# define the path
+$ENV{'PATH'} = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin";
+
+# define the hostname
+my $server_name = "srv-debian01-gato";
+# enable flexbackup
+my $bkp_enable = 1;
+# define the rsync program
+my $rsync = "rsync";
+# define the rsync options
+my $rsync_opts = "-auvvz";
+# define the flexbackup program
+my $flexbackup = "flexbackup";
+# define the flexbackup options
+my $flexbackup_opts = "-ignore-errors -set all -level";
+# define the first day of the week
+my $weekday = "%u";
+
+# enable if you want to send backup to remote server
+my $remote_send = 0;
+
+# define the remote username
+my $remote_user = "ananke";
+# define the remote ip
+my $remote_host = "10.10.129.139";
+# define the remote path
+my $remote_path = "/backup";
+# define the remote backup dir
+my $remote_dir = "$server_name/files";
+
+# define the local backup dir
+my $bkp_dir = "/backup/atual";
+# define the local olds backup dir
+my $bkp_old_dir = "/backup/backups-antigos";
+# declare the days variable (dont change this).
+my $days = 0;
+# defines the maximum days for old backups
+my $max_days = 8;
+
+# enables full if the first day of the week is sunday
+my $full = 1; # if (&date($weekday) == "7");
+
+# enable debug
+my $debug = 1;
+
+# enable mysql backup
+my $mysql_enable = 1;
+
+# define the mysql hostname
+my $mysql_host = "localhost";
+# define the mysql username
+my $mysql_user = "root";
+# define the mysql password
+my $mysql_pass = '##KnAgoRw';
+# define the mysql port
+my $mysql_port = '3306';
+# define the mysql options
+my $mysql_opts = "--skip-comments --compress";
+# define the databases that are not part of the backup
+my @mysql_exclude_dbs = qw(test information_schema lost+found);
+# define the local mysql backup dir
+my $bkp_mysql_dir = "/backup/dumps";
+# define the remote mysql backup dir
+my $mysql_remote_dir = "$server_name/mysql";
+# defines the maximum days for mysql old backups
+my $mysql_max_days = 8;
+
+# enable the report send messages
+my $send_message = 0;
+# define the mail from
+my $mail_from = 'backup@anankeit.com.br';
+# define the mail to.
+my @mail_to = ('bkpl@ananke.com.br');
+# define the smtp server
+my $smtp_server = "smtp-shared02.ananke.com.br";
+
+&check_programs;
+&bkp_full if ($full) and ($bkp_enable);
+&bkp_incremental if (!$full) and ($bkp_enable);
+&bkp_mysql if ($mysql_enable);
+&send_backup if ($remote_send);
+&send_email($msg) if ($send_message);
+
+sub check_programs {
+        my $check_flexbackup = `which flexbackup`;
+        my $check_mysqldump = `which mysqldump`;
+        my $check_rsync = `which rsync`;
+        if ((!$check_flexbackup) and ($bkp_enable)) {
+                print "flexbackup program not found.\n";
+                $bkp_enable = 0;
+        }
+        if ((!$check_mysqldump) and ($mysql_enable)) {
+                print "mysqldump program not found.\n";
+                $mysql_enable = 0;
+        }
+        if ((!$check_rsync) and ($remote_send)) {
+                print "rsync program not found.\n";
+                $remote_send = 0;
+        }
+}
+
+sub bkp_full {
+        &remove_old_files($bkp_old_dir,$max_days);
+        print "\n----------starting backup full----------\n\n" if ($debug);
+        $msg .= "\n----------starting backup full----------\n";
+        $flexbackup_opts .= " full";
+        if (! -d $bkp_old_dir) {
+                mkdir ($bkp_old_dir,0755) or die "cannot mkdir $_\n$!";
+        }
+        my $old_dir = $bkp_old_dir . "/" . &date("%Y%m%d");
+        mkdir($old_dir,0755) if (! -d $old_dir);
+        opendir(DIR,"$bkp_dir") or die "Cannot opendir $bkp_dir: $!";
+        my @files = sort grep { !/^\./ && -f "$bkp_dir/$_" } readdir (DIR);
+        close (DIR);
+        $msg .= "\n----------moving old files if $bkp_dir/ to $old_dir/----------\n\n";
+        foreach my $file (@files) {
+                print "moving old file $bkp_dir/$file to $old_dir/\n" if ($debug);
+                $msg .= `mv -v $bkp_dir/$file $old_dir/`;
+        }
+        undef $old_dir;
+        my @backup = `$flexbackup $flexbackup_opts`;
+        foreach my $line (@backup) { $msg .= $line; }
+        print "\n----------ending backup full----------\n\n" if ($debug);
+        $msg .= "----------ending backup full----------\n\n";
+}
+
+sub bkp_incremental {
+        $flexbackup_opts .= " incremental";
+        print "\n----------starting backup incremental----------\n\n" if ($debug);
+        $msg .= "\n----------starting backup incremental----------\n";
+        my @backup = `$flexbackup $flexbackup_opts`;
+        foreach my $line (@backup) { $msg .= $line; }
+        print "\n----------ending backup incremental----------\n\n" if ($debug);
+        $msg .= "----------ending backup incremental----------\n\n";
+}
+
+sub date($$) {
+        use POSIX qw(strftime);
+        my $data = shift;
+        my $time = shift;
+        $time = 0 if (!$time);
+        $time *= 86400 if($time);
+        return (strftime $data, localtime(time() - $time));
+}
+
+sub bkp_mysql {
+        &remove_old_files($bkp_mysql_dir,$mysql_max_days);
+        use DBI;
+        my $connect = "DBI:mysql:database=mysql;host=$mysql_host;port=$mysql_port";
+        my $sql = 0;
+        if ($mysql_pass) {
+                $sql = DBI->connect($connect,$mysql_user,$mysql_pass);
+        } else {
+                $sql = DBI->connect($connect,$mysql_user);
+        }
+        my @databases = $sql->func('_ListDBs');
+        $sql->disconnect;
+        if (scalar(@mysql_exclude_dbs)) {
+                my %mysql_exclude_dbs = map {$_,$_} @mysql_exclude_dbs;
+                @databases = grep {!exists($mysql_exclude_dbs{$_})} @databases;
+        }
+        print ("\n----------starting MySQL backup----------\n\n") if ($debug);
+        $msg .= "\n----------starting MySQL backup----------\n\n";
+        foreach my $database (@databases) {
+                my $connect = "DBI:mysql:database=$database;host=$mysql_host;port=$mysql_port";
+                my $sql = DBI->connect($connect,$mysql_user,$mysql_pass);
+                my $infos = $sql->table_info();
+                while (my($qual, $owner, $table, $type) = $infos->fetchrow_array()) {
+                        &mysql_dump($table,$database);
+                }
+                $sql->disconnect;
+        }
+        print ("\n----------ending MySQL backup----------\n\n") if ($debug);
+        $msg .= "\n----------ending MySQL backup----------\n\n";
+}
+
+sub mysql_dump($$) {
+        my $table = shift;
+        my $database = shift;
+        $table =~ s/(\'|\`)//g;
+        my $dir = &date("%Y%m%d");
+        mkdir($bkp_mysql_dir,0755) unless -d $bkp_mysql_dir;
+        chdir($bkp_mysql_dir);
+        mkdir($database,0755) unless -d $database;
+        chdir($database);
+        mkdir($dir,0755) unless -d $dir;
+        chdir($dir);
+        unlink "$table.sql.gz" if (-e "$table.sql.gz");
+        printf ("Making backup of the database %s, table %s\n", $database, $table) if ($debug);
+        $msg .= sprintf ("Making backup of the database %s, table %s\n", $database, $table);
+        if ($mysql_pass) {
+                system("mysqldump --user=$mysql_user --password=$mysql_pass --host=$mysql_host $mysql_opts $database $table > $table.sql");
+        } else {
+                system("mysqldump --user=$mysql_user --host=$mysql_host $mysql_opts $database $table > $table.sql");
+        }
+        system("gzip $table.sql");
+        chdir($bkp_mysql_dir);
+}
+
+sub remove_old_files($$) {
+        use File::Find;
+        my $base_dir = shift;
+        $days = shift;
+        find({
+                wanted => \&files,
+                postprocess => \&dirs,
+        }, $base_dir);
+}
+
+sub files {
+        my $file = $File::Find::name;
+        if (-f $file and -M _ > $days) {
+                printf ("removing old file %s\n", $file) if $debug;
+                $msg .= sprintf ("removing old file %s\n", $file);
+                unlink $_;
+        }
+}
+
+sub dirs {
+        use File::Path;
+        my $dir_name = $File::Find::dir;
+        my $mtime = (stat($dir_name))[9];
+        my $time = $init_time - 120;
+        if (-d $dir_name and $mtime >= $time and $dir_name =~ /\/\d+$/) {
+                printf ("removing old dir %s\n", $dir_name) if $debug;
+                $msg .= sprintf ("removing old dir %s\n", $dir_name);
+                rmdir $dir_name;
+        }
+}
+
+sub send_backup {
+        if ($bkp_enable) {
+                printf ("sending backup files to remote server %s\n", $remote_host) if $debug;
+                my @send_backup = `$rsync $rsync_opts $bkp_dir/ rsync://$remote_user\@$remote_host:$remote_path/$remote_dir/`;
+                foreach my $line (@send_backup) { $msg .= $line; }
+        }
+        if ($mysql_enable) {
+                printf ("sending mysql backup to remote server %s\n", $remote_host) if $debug;
+                my @send_backup = `$rsync $rsync_opts $bkp_mysql_dir/ rsync://$remote_user\@$remote_host:$remote_path/$mysql_remote_dir/`;
+                foreach my $line (@send_backup) { $msg .= $line; }
+        }
+}
+
+sub send_email($) {
+        my $message = shift;
+        my $date = &date("%d/%m/%Y");
+        use MIME::Lite;
+        if ($message) {
+                foreach my $to_addr (@mail_to) {
+                        printf ("sending email to %s\n", $to_addr) if $debug;
+                        my $email = MIME::Lite->new(
+                        From            => $mail_from,
+                        To              => $to_addr,
+                        Subject         => "backup $server_name $date",
+                        Type            => 'TEXT',
+                        Data            => $message
+                        );
+                        $email->send('smtp',$smtp_server);
+                }
+        }
+}
