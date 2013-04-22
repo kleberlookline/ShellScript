@@ -1,0 +1,138 @@
+# cat joedog.sh
+#!/bin/sh
+# Author: Jeffrey Fulmer
+# Email:  http://www.joedog.org/support/
+# Date:   Wed Mar 14 14:36:10 EDT 2012
+# -
+# This script archives the system to 10.38.240.71:/export for
+# bare metal restoration.
+#
+FQDN=$(/bin/hostname)
+HOST=$(/bin/hostname -s)
+MSCR="/export/$HOST/scratch"
+MTMP="/export/$HOST/tmp"
+TYPE=0
+CONF="/usr/local/etc/excludes.conf"
+EXCL=""
+NFSD="10.37.72.44:/export"
+
+#
+# Read the exclude list from $CONF
+if [[ -e $CONF ]] ; then
+  while read line ; do
+   chr=${line:0:1}
+   case $chr in
+     '#')
+       # ignore comments
+       ;;
+     *)
+       #if [[ ! -z $line ]] ; then
+       if [[ ${#line} -gt 2 ]] ; then
+         if [[ -z $EXCL ]] ; then
+           EXCL="$line"
+         else
+           EXCL="$EXCL|$line"
+         fi
+       fi
+       ;;
+   esac
+  done < $CONF
+else
+  EXCL="/export /var/mail /var/log"
+fi
+
+#
+# either -c or -n is required
+while getopts "cn" opt ; do
+  case $opt in
+    c)
+      let TYPE=1
+      ;;
+    n)
+      let TYPE=2
+      ;;
+  esac
+done
+
+usage() {
+  cat << EOF
+Usage: archiver [-c|-n]
+Requires either a '-c' or a '-n' argument
+  -c      create a CD Rom archive
+  -n      create an NFS archive
+EOF
+  exit 1
+}
+
+prep() {
+
+  mount=$(cat /proc/mounts | grep export)
+
+  if [[ -z $mount ]] ; then
+    echo "ERROR: /export is not mounted"
+    exit 1
+  fi
+
+  if [ ! -e /export/$HOST ] ; then
+    mkdir -p /export/$HOST
+  else
+    mv /export/$HOST /export/$HOST.off
+    echo "mkdir"
+    mkdir -p /export/$HOST
+  fi
+
+  if [ ! -e $MSCR ] ; then
+    mkdir -p $MSCR
+  fi
+
+  if [ ! -e $MTMP ] ; then
+    mkdir -p $MTMP
+  fi
+}
+
+cdrom_archive() {
+  echo "CD Rom Archive"
+
+  /usr/sbin/mondoarchive -OVi -d /export/$HOST -S $MSCR -T $MTMP -9 \
+                         -G -p $HOST -s 700m -N -E "\"$EXCL\""
+  if [[ $? != 0 ]]; then
+    ## If this is not invoked by TWS, then
+    ## we should put a messaging device here
+    exit 1
+  else
+    rm -Rf /export/$HOST.off
+  fi
+
+  cp -f /var/cache/mindi/mondorescue.iso /export/$HOST/$HOST-rescue.iso
+
+  rm -Rf $MSCR
+  rm -Rf $MTMP
+}
+
+nfs_archive() {
+  echo "NFS Archive"
+
+  /usr/sbin/mondoarchive -OVn "$NFSD" -S $MSCR  -T $MTMP -9 \
+                         -G -p $HOST -s 2g -N -E "\"$EXCL\""
+
+  cp -f /var/cache/mindi/mondorescue.iso /export/$HOST-rescue.iso
+
+  rm -Rf /export/$HOST
+}
+
+case $TYPE in
+  0)
+    usage
+    ;;
+  1)
+    prep
+    cdrom_archive
+    ;;
+  2)
+    prep
+    nfs_archive
+    ;;
+esac
+
+exit 0;
+
