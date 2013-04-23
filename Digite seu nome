@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo -n "Digite seu nome: "
+read nome
+
+echo -e "O nome deste doido eh o nome digitado: $nome"
