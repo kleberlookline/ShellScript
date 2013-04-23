@@ -1,0 +1,95 @@
+  1 #!/bin/bash
+  2
+  3 #clear
+  4 #date +'%d/%m/20%y %H:%M:%S'
+  5 #echo
+  6 #script base com algumas informacoes para ajudar na programacao
+  7 #Comparacao matematica          Comparacao em Script
+  8 #5 == 6                         If [ 5 -eq 6 ]  igual
+  9 #5 != 6                         If [ 5 -ne 6 ]  diferente
+ 10 #5 < 6                          If [ 5 -lt 6 ]  menor
+ 11 #5 <= 6                         If [ 5 -le 6 ]  menor ou igual
+ 12 #5 > 6                          If [ 5 -gt 6 ]  maior
+ 13 #5 >= 6                         If [ 5 -ge 6 ]  maior ou igual
+ 14
+ 15 CHECK_TELNET_INSTALL=`dpkg -l | grep telnet | awk '{ print $2 }'`
+ 16 CHECK_PORT_FTP_ON1=`netstat -anp | grep "LISTEN " | grep 0.0.0.0:21 | awk '{ print  $4 }' | sed 's/\0.0.0.0://'`
+ 17 CHECK_PORT_FTP_ON2=`netstat -anp | grep "LISTEN " | grep :::21 | awk '{ print  $4 }' | sed 's/\::://'`
+ 18 CHECK_JOB_FTP_ON=`ps aux | grep pure-ftpd | grep SERVER | awk '{ print $11 }' | sed 's/\pure-//'`
+ 19 #CHECK_CONNECTION_PORT21=` telnet localhost 21`
+ 20
+ 21 if [[ $CHECK_TELNET_INSTALL == telnet ]]
+ 22         then
+ 23                 echo
+ 24                 echo -e "O programa telnet esta instalado"
+ 25                 echo
+ 26         else
+ 27                 apt-get install telnet -y
+ 28                 echo -e "O programa de telnet acabou de ser instalado"
+ 29         fi
+ 30
+ 31 if [[ $CHECK_JOB_FTP_ON == ftpd ]]
+ 32         then
+ 33                 echo
+ 34                 echo -e "O servico de FTP esta em Execucao"
+ 35                 echo
+ 36         else
+ 37                 echo
+ 38                 /etc/init.d/pure-ftpd-mysql stop && sleep 2 && /etc/init.d/pure-ftpd-mysql stop && sleep 1 && /etc/init.d/pure-ftpd-mysql start
+ 39                 echo -e "O servico de FTP foi reiniciado"
+ 40                 echo
+ 41 fi
+ 42
+ 43 if [  $CHECK_PORT_FTP_ON1 == 21 && $CHECK_PORT_FTP_ON2 == 21 ]
+ 44                 then
+ 45                 echo -e "A Porta do Telnet esta Aberta"
+ 46                 echo
+ 47
+ 48 #               elif test $CHECK_PORT_FTP_ON1 -eq $CHECK_PORT_FTP_ON2
+ 49 #                       echo
+ 50 #                       echo -e "Agora a Porta 21 do Telnet esta ABERTA!!"
+ 51 #                       echo
+ 52
+ 53 fi
+ 54
+ 55
+ 56
+ 57
+ 58 clear
+ 59 echo -n "Digite um numero: "
+ 60 read VARIAVEL1
+ 61
+ 62 echo -n "Digite o segundo numero: "
+ 63 read VARIAVEL2
+ 64
+ 65 if [ $VARIAVEL1 -eq $VARIAVEL2  ]
+ 66         then
+ 67         echo -e "\033[1;37m $VARIAVEL1 \033[0m \033[46;1;37m eh igual \033[0m \033[1;37m $VARIAVEL2 \033[0m"
+ 68
+ 69 elif  test $VARIAVEL1 -lt $VARIAVEL2
+ 70                 then
+ 71                 echo -e "\033[1;37m $VARIAVEL1 \033[0m \033[46;1;37m eh menor que \033[0m \033[1;37m $VARIAVEL2 \033[0m"
+ 72                         else
+ 73                         echo -e "\033[1;37m $VARIAVEL1 \033[0m \033[46;1;37m eh maior que \033[0m \033[1;37m $VARIAVEL2 \033[0m"
+ 74 fi
+ 75
+ 76 echo -n "Digite uma palavra: "
+ 77 read VARIAVEL1
+ 78
+ 79 echo -n "Digite o segunda palavra: "
+ 80 read VARIAVEL2
+ 81
+ 82 if [ $VARIAVEL1 == $VARIAVEL2 ]
+ 83         then
+ 84         echo -e "\033[1;37m $VARIAVEL1 \033[0m \033[33;1;33m eh uma palavra igual a \033[0m -->  \033[1;37m $VARIAVEL2 \033[0m"
+ 85
+ 86 elif  test $VARIAVEL1 != $VARIAVEL2
+ 87                 then
+ 88                 echo -e "\033[1;37m $VARIAVEL1 \033[0m \033[33;1;33m eh uma palavra diferente de \033[0m -->  \033[1;37m $VARIAVEL2 \033[0m"
+ 89 # nao vai chegar nunca nessa condicao
+ 90 #                        else
+ 91 #                        echo "$VARIAVEL1 ou quase parecidas kkkk..  $VARIAVEL2"
+ 92 fi
+ 93 echo
+ 94 echo -e "\033[1;31m Bye... \033[0m"
+ 95
