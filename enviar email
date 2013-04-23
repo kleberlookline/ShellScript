@@ -1,0 +1,1 @@
+ mailx -s "Script - de - teste" kleber.lookline@gmail.com; erikaoliveira_sp@yahoo.com.br  < /home/kleber/mail.txt
