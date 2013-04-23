@@ -1,0 +1,42 @@
+  1 #!/bin/bash
+  2 # este scritp eh para checar o uso do disco em porcentagem
+  3 # kleber pereira - email bsl.opensource@gmail.com
+  4 # data 08/02/2013
+  5
+  6 # ATENCAO!!!
+  7 # para esse programa funcionar tem q instalar o programa mutt com o comando abaixo:
+  8 # <apt-get install mutt>
+  9
+ 10
+ 11
+ 12
+ 13 DISCO_BARRA=`df -h | grep /dev/sda1 | awk {'print $5'} | sed s/%\//`
+ 14 DISCO_DATA=`df -h | grep /dev/sda3 | awk {'print $5'} | sed s/%\//`
+ 15 DISCO_BACKUP=`df -h | grep /dev/sda4 | awk {'print $5'} | sed s/%\//`
+ 16
+ 17 # aqui esta sendo lendo a particao /
+ 18 if [ $DISCO_BARRA -ge 75 ]
+ 19         then
+ 20                 echo "O disco / esta 75% de uso favor verificar - do servidor hm-ld03-debian-vaca IP: 192.168.0.2 " | mutt -s "Alerta de disco cheio -->     SRV-LINUX" -- bsl.opensource@gmail.com , erikaoliveira_sp@yahoo.com.br
+ 21
+ 22 fi
+ 23
+ 24
+ 25
+ 26
+ 27 # aqui esta sendo lendo a particao /data
+ 28 if [ $DISCO_DATA -ge 75 ]
+ 29         then
+ 30                 echo "O disco /data esta 75% de uso favor verificar - do servidor hm-ld03-debian-vaca IP: 192.168.0.2 " | mutt -s "Alerta de disco cheio     --> SRV-LINUX" -- bsl.opensource@gmail.com , erikaoliveira_sp@yahoo.com.br
+ 31
+ 32 fi
+ 33
+ 34
+ 35
+ 36
+ 37 # aqui esta sendo lendo a particao /backup
+ 38 if [ $DISCO_BACKUP -ge 75 ]
+ 39         then
+ 40                 echo "O disco /backup esta 75% de uso favor verificar - do servidor hm-ld03-debian-vaca IP: 192.168.0.2 " | mutt -s "Alerta de disco chei    o --> SRV-LINUX" -- bsl.opensource@gmail.com , erikaoliveira_sp@yahoo.com.br , kleber.lookline@gmail.com
+ 41
+ 42 fi
