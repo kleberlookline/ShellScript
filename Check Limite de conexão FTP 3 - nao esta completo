@@ -1,0 +1,50 @@
+  1 #!/bin/bash
+  2
+  3 clear
+  4 CHECK_TELNET_INSTALL=`dpkg -l | grep telnet | awk '{ print $2 }'`
+  5 CHECK_PORT_FTP_ON1=`netstat -anp | grep "LISTEN " | grep 0.0.0.0:21 | awk '{ print  $4 }' | sed 's/\0.0.0.0://'`
+  6 CHECK_PORT_FTP_ON2=`netstat -anp | grep "LISTEN " | grep :::21 | awk '{ print  $4 }' | sed 's/\::://'`
+  7 CHECK_JOB_FTP_ON=`ps aux | grep pure-ftpd | grep SERVER | awk '{ print $11 }' | sed 's/\pure-//'`
+  8
+  9 #Variaveis que pegam erro:
+ 10 #CHECK_ERROR1_FTP=`telnet localhost 21 | grep "grep (the maximum)"`
+ 11 #CHECK_ERROR2_FTP=`telnet localhost 21 | grep "Unable to connect to remote host"`
+ 12
+ 13 #Antes disparar:
+ 14 #KILL_SLEEP_5SCS=`sleep 5 && killall -9 telnet`
+ 15 #Variavel que pega o servico OK:
+ 16 #CHECK_ACCESS1_FTP=`telnet localhost 21 | grep "Welcome to Pure-FTPd" | awk {' print $2, $3, $4 '}`
+ 17
+ 18 if [[ $CHECK_TELNET_INSTALL == telnet ]]
+ 19         then
+ 20                 echo
+ 21                 echo -e "O programa telnet esta instalado"
+ 22                 echo
+ 23         else
+ 24                 apt-get install telnet -y
+ 25                 echo -e "O programa de telnet acabou de ser instalado"
+ 26 fi
+ 27
+ 28 if [[ $CHECK_JOB_FTP_ON == ftpd ]]
+ 29         then
+ 30                 echo
+ 31                 echo -e "O servico de FTP esta em Execucao"
+ 32                 echo
+ 33         else
+ 34                 echo
+ 35                 /etc/init.d/pure-ftpd-mysql stop && sleep 2 && /etc/init.d/pure-ftpd-mysql stop && sleep 1 && /etc/init.d/pure-ftpd-mysql start
+ 36                 echo -e "O servico de FTP foi reiniciado"
+ 37                 echo
+ 38 fi
+ 39
+ 40
+ 41 if [ $CHECK_PORT_FTP_ON1 -eq $CHECK_PORT_FTP_ON2 ]
+ 42                 then
+ 43                 echo -e "A Porta do Telnet esta Aberta"
+ 44                 echo
+ 45
+ 46                 else $CHECK_PORT_FTP_ON1 -ne $CHECK_PORT_FTP_ON2
+ 47                         echo
+ 48                         echo -e "Porta 21 nao esta funcionando!!"
+ 49                         echo
+ 50 fi
