@@ -1,0 +1,23 @@
+#!/bin/bash
+
+clear
+
+NOMEDOPROCESSOKOPETE=`ps -f | grep /usr/bin/kopete | head -n1 | awk {' print $8 '}`
+NUMEROPROCESSODOKOPETE=`ps aux | grep kopete | awk {' print $2 '} | head -n1`
+#RESPOSTA=`sim`
+
+if [ "$NOMEDOPROCESSOKOPETE" = 'grep' ]
+                then
+                        echo -e '\033[33;1m O gtalk nao esta ligado!! inicie o programa usando a palavra SIM: \033[m'
+                else
+                        echo -e '\033[33;1m GTALK esta ligado, divirta-se!! \033[m'
+fi
+
+read -p "Voce quer ligar o Gtalk? " RESPOSTA && echo "$RESPOSTA"
+
+if [ "$RESPOSTA" = 'sim' ]
+                then
+                        /usr/bin/kopete &
+                else
+                        echo -e '\033[33;1m Voce nao ligou o Gtalk!! Obrigado por usar o script BSL \033[m'
+fi
