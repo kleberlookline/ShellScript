@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dirbat="/home/kleber/"
+dirbatsim="/home/kleber/sim/"
+filestopstart="$dirbat/true.txt"
+lerarquivo=`cat $filestopstart | grep yes`
+valordabat="yes"
+
+if [ "$lerarquivo" == "$valordabat" ];
+        then
+                cd $dirbatsim && touch yu yi yo
+        else
+                echo -e "Este eh um erro de que nao o arquivo true.txt nao tem o conteudo (yes)" > /home/kleber/erro.txt
+fi
