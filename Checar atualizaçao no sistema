@@ -1,4 +1,4 @@
-root@srv-debian01-gato:~/scripts/ananke-scripts# cat check_update.pl
+root@srv-debian01-gato:~/scripts/scripts# cat check_update.pl
 #!/usr/bin/perl -w
 #
 # um simples programa para verificar se existe atualizacao de
@@ -13,10 +13,10 @@ use strict;
 
 $ENV{'PATH'} = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
-my $hostname = 'devassa';
-my $mail_from = 'updates@ananke.com.br';
-my @mail_to = ('sysl@ananke.com.br');
-my $smtp_server = 'smtp-shared02.ananke.com.br';
+my $hostname = 'srv-debian01-gato';
+my $mail_from = 'updates@gmail.com.br';
+my @mail_to = ('sysl@gmail.com.br');
+my $smtp_server = 'smtp-shared02.servidor-de-email.com.br';
 my $debug = 1;
 my $msg;
 
