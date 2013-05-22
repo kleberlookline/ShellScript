@@ -1,6 +1,6 @@
   1 #!/bin/bash
   2 #
-  3 # Firewall tabajara by claudio <claudio@ananke.com.br>
+  3 # Firewall tabajara by claudio <kleber.lookline@gmail.com>
   4 #
   5 EXT_IPS="174.34.230.92"
   6 LO_IP="127.0.0.1"
