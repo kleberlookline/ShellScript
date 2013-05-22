@@ -64,9 +64,9 @@ my $weekday = "%u";
 my $remote_send = 0;
 
 # define the remote username
-my $remote_user = "ananke";
+my $remote_user = "nome_usuario";
 # define the remote ip
-my $remote_host = "10.10.129.139";
+my $remote_host = "10.10.129.XXX";
 # define the remote path
 my $remote_path = "/backup";
 # define the remote backup dir
@@ -95,7 +95,7 @@ my $mysql_host = "localhost";
 # define the mysql username
 my $mysql_user = "root";
 # define the mysql password
-my $mysql_pass = '##KnAgoRw';
+my $mysql_pass = 'XXXXXX';
 # define the mysql port
 my $mysql_port = '3306';
 # define the mysql options
@@ -112,11 +112,11 @@ my $mysql_max_days = 8;
 # enable the report send messages
 my $send_message = 0;
 # define the mail from
-my $mail_from = 'backup@anankeit.com.br';
+my $mail_from = 'backup@gmailcom';
 # define the mail to.
-my @mail_to = ('bkpl@ananke.com.br');
+my @mail_to = ('bkpl@gmail.com');
 # define the smtp server
-my $smtp_server = "smtp-shared02.ananke.com.br";
+my $smtp_server = "smtp-shared.servidor-de-emnail.com.br";
 
 &check_programs;
 &bkp_full if ($full) and ($bkp_enable);
