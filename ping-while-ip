@@ -1,0 +1,44 @@
+#!/bin/bash
+# teste de ping 31-07-2013 - kleber.lookline@gmail.com
+
+
+echo -e "Favor inserir os 3 Primeiros Octetos, para formar o  range de ips: XXX.XXX.XXX\n"
+echo exemplo: "177.52.131"
+read ip_range
+
+
+
+# variavel ip igual a zero
+ip=0;
+        while
+
+# enquanto a variavel ip for menor "-lt" que 125
+        [ "$ip" -lt 125 ];
+
+# entao a variavel ip soma mais um "+1"
+                do ip=$((ip+1));
+
+# imprime na tela o teste de ping mundando o ip sempre somando mais um e nao podendo passar de 255
+                        echo `ping -c 1 -t 13 $ip_range.$ip`;
+
+# faca
+done;
+
+sleep 10
+
+#--------------------------------------------------------------------------------------------------------------
+# variavel ip igual a 126
+ip=126;
+        while
+
+# enquanto a variavel ip for menor "-lt" que 255
+        [ "$ip" -lt 255 ];
+
+# entao a variavel ip soma mais um "+1"
+                do ip=$((ip+1));
+
+# imprime na tela o teste de ping mundando o ip sempre somando mais um e nao podendo passar de 255
+                        echo `ping -c 1 -t 13 $ip_range.$ip`;
+
+# faca
+done;
