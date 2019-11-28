@@ -1,4 +1,5 @@
 # cat agua
+
 #!/bin/bash
 
 # Operadores Relacionais
@@ -20,7 +21,7 @@ if [ $valor_agua1 ==  $nao ]
         echo -n "Tah com sede? - [sim|nao] "
         read valor_agua2
 fi
-                        if [ $valor_agua2 ==  $sim ]
+                        if [ "$valor_agua2" ==  $sim ]
                                 then
                                 echo "Olha, olha, olha, olha a agua mineral!"
                                 sleep 2
@@ -39,4 +40,7 @@ fi
                         if [ $valor_agua1 == $sim ]
                                 then
                                 echo "Entao ta BOM fiiiii !!!"
+                                        else
+                                        echo "Obrigado pela atencao!!!"
                         fi
+
